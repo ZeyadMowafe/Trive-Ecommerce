@@ -1,0 +1,71 @@
+.auth-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  padding: 3rem 0;
+}
+.auth-container {
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+}
+.auth-container h1 {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+}
+.auth-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  margin-bottom: 2.5rem;
+}
+.auth-form {
+  text-align: left;
+  margin-bottom: 2rem;
+}
+.error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 0.875rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+.social-login {
+  margin: 2rem 0;
+}
+.social-login p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+.social-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.social-btn {
+  padding: 0.875rem;
+  border: 1px solid var(--border-color);
+  background-color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+.social-btn:hover {
+  border-color: var(--primary-dark);
+}
+.social-btn.google {
+  color: #db4437;
+}
+.social-btn.facebook {
+  color: #4267b2;
+}
+.auth-switch {
+  color: var(--text-secondary);
+}
+.auth-switch a {
+  color: var(--primary-dark);
+  font-weight: 600;
+}

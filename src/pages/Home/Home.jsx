@@ -1,0 +1,239 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import { motion } from 'framer-motion';
+import ProductCard from '../../components/ProductCard/ProductCard';
+import { productsAPI, categoriesAPI } from '../../services/api';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+import './Home.css';
+
+const Home = () => {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productsData, categoriesData] = await Promise.all([
+          productsAPI.getAll(),
+          categoriesAPI.getAll()
+        ]);
+        setProducts(productsData.products);
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const newArrivals = products.filter(p => p.isNew);
+  const bestSellers = products.filter(p => p.isBestSeller);
+
+  const filteredNewArrivals = selectedCategory === 'all' 
+    ? newArrivals 
+    : newArrivals.filter(p => p.category === selectedCategory);
+
+  const heroSlides = [
+    {
+      image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600',
+      title: 'Winter Collection',
+      subtitle: 'Discover Timeless Elegance',
+      link: '/shop/women'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1600',
+      title: 'New Arrivals',
+      subtitle: 'Fresh Styles for the Season',
+      link: '/shop/new'
+    }
+  ];
+
+  return (
+    <div className="home-page">
+      {/* Hero Section */}
+      <section className="hero-section">
+        <Swiper
+          modules={[Autoplay, Pagination, Navigation]}
+          spaceBetween={0}
+          slidesPerView={1}
+          autoplay={{ delay: 5000, disableOnInteraction: false }}
+          pagination={{ clickable: true }}
+          navigation
+          loop
+          className="hero-swiper"
+        >
+          {heroSlides.map((slide, index) => (
+            <SwiperSlide key={index}>
+              <div className="hero-slide">
+                <div className="hero-image">
+                  <img src={slide.image} alt={slide.title} />
+                  <div className="hero-overlay"></div>
+                </div>
+                <div className="hero-content">
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                  >
+                    <p className="hero-subtitle">{slide.subtitle}</p>
+                    <h1 className="hero-title">{slide.title}</h1>
+                    <Link to={slide.link} className="btn-primary">
+                      Shop Now
+                    </Link>
+                  </motion.div>
+                </div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </section>
+
+      {/* New Arrivals Section */}
+      <section className="new-arrivals-section section-padding">
+        <div className="container-custom">
+          <div className="section-header">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              New Arrivals
+            </motion.h2>
+            
+            <div className="category-tabs">
+              <button
+                className={`category-tab ${selectedCategory === 'all' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('all')}
+              >
+                All
+              </button>
+              <button
+                className={`category-tab ${selectedCategory === 'women' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('women')}
+              >
+                Women
+              </button>
+              <button
+                className={`category-tab ${selectedCategory === 'men' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('men')}
+              >
+                Men
+              </button>
+              <button
+                className={`category-tab ${selectedCategory === 'accessories' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('accessories')}
+              >
+                Accessories
+              </button>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="products-grid">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="skeleton" style={{ height: '500px' }}></div>
+              ))}
+            </div>
+          ) : (
+            <motion.div 
+              className="products-grid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              key={selectedCategory}
+            >
+              {filteredNewArrivals.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </motion.div>
+          )}
+        </div>
+      </section>
+
+      {/* Discover Categories Section */}
+      <section className="categories-section section-padding">
+        <div className="container-custom">
+          <motion.h2
+            className="section-title-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            Discover Categories
+          </motion.h2>
+
+          <div className="categories-grid">
+            {categories.map((category, index) => (
+              <motion.div
+                key={category.id}
+                className="category-card"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              >
+                <Link to={`/shop/${category.slug}`}>
+                  <div className="category-image">
+                    <img src={category.image} alt={category.name} />
+                    <div className="category-overlay"></div>
+                  </div>
+                  <div className="category-content">
+                    <h3>{category.name}</h3>
+                    <span className="category-arrow">→</span>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Best Sellers Section */}
+      <section className="bestsellers-section section-padding">
+        <div className="container-custom">
+          <motion.h2
+            className="section-title-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            Best Sellers
+          </motion.h2>
+
+          {loading ? (
+            <div className="products-grid">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="skeleton" style={{ height: '500px' }}></div>
+              ))}
+            </div>
+          ) : (
+            <div className="products-grid">
+              {bestSellers.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+
+          <div className="section-cta">
+            <Link to="/shop" className="btn-outline">
+              View All Products
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Home;
