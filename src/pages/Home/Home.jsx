@@ -1,19 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation } from 'swiper/modules';
-import { motion } from 'framer-motion';
-import ProductCard from '../../components/ProductCard/ProductCard';
-import { productsAPI, categoriesAPI } from '../../services/api';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
-import './Home.css';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+import { motion } from "framer-motion";
+import ProductCard from "../../components/ProductCard/ProductCard";
+import { productsAPI, categoriesAPI } from "../../services/api";
+import "swiper/css";
+import "swiper/css/pagination";
+import "./Home.css";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,12 +20,12 @@ const Home = () => {
       try {
         const [productsData, categoriesData] = await Promise.all([
           productsAPI.getAll(),
-          categoriesAPI.getAll()
+          categoriesAPI.getAll(),
         ]);
         setProducts(productsData.products);
         setCategories(categoriesData);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -35,26 +34,29 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const newArrivals = products.filter(p => p.isNew);
-  const bestSellers = products.filter(p => p.isBestSeller);
+  const newArrivals = products.filter((p) => p.isNew);
+  const bestSellers = products.filter((p) => p.isBestSeller);
 
-  const filteredNewArrivals = selectedCategory === 'all' 
-    ? newArrivals 
-    : newArrivals.filter(p => p.category === selectedCategory);
+  const filteredNewArrivals =
+    selectedCategory === "all"
+      ? newArrivals
+      : newArrivals.filter((p) => p.category === selectedCategory);
 
   const heroSlides = [
     {
-      image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600',
-      title: 'Winter Collection',
-      subtitle: 'Discover Timeless Elegance',
-      link: '/shop/women'
+      image:
+        "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600",
+      title: "Winter Collection",
+      subtitle: "Discover Timeless Elegance",
+      link: "/shop/women",
     },
     {
-      image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1600',
-      title: 'New Arrivals',
-      subtitle: 'Fresh Styles for the Season',
-      link: '/shop/new'
-    }
+      image:
+        "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1600",
+      title: "New Arrivals",
+      subtitle: "Fresh Styles for the Season",
+      link: "/shop/new",
+    },
   ];
 
   return (
@@ -62,12 +64,16 @@ const Home = () => {
       {/* Hero Section */}
       <section className="hero-section">
         <Swiper
-          modules={[Autoplay, Pagination, Navigation]}
+          modules={[Autoplay, Pagination]}
           spaceBetween={0}
           slidesPerView={1}
           autoplay={{ delay: 5000, disableOnInteraction: false }}
-          pagination={{ clickable: true }}
-          navigation
+          pagination={{
+            clickable: true,
+            bulletClass: "swiper-pagination-bullet custom-bullet",
+            bulletActiveClass:
+              "swiper-pagination-bullet-active custom-bullet-active",
+          }}
           loop
           className="hero-swiper"
         >
@@ -78,7 +84,7 @@ const Home = () => {
                   <img src={slide.image} alt={slide.title} />
                   <div className="hero-overlay"></div>
                 </div>
-                <div className="hero-content">
+                <div className="hero-content" style={{ marginBottom: "5rem" }}>
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -86,15 +92,21 @@ const Home = () => {
                   >
                     <p className="hero-subtitle">{slide.subtitle}</p>
                     <h1 className="hero-title">{slide.title}</h1>
-                    <Link to={slide.link} className="btn-primary">
-                      Shop Now
-                    </Link>
                   </motion.div>
                 </div>
               </div>
             </SwiperSlide>
           ))}
         </Swiper>
+
+        {/* Shop Now Button - ثابت خارج الـ Swiper */}
+        <div className="hero-content" style={{ pointerEvents: "none" }}>
+          <div style={{ pointerEvents: "auto", marginTop: "20rem" }}>
+            <Link to="/shop" className="btn-primary">
+              Shop Nowzz
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* New Arrivals Section */}
@@ -109,29 +121,29 @@ const Home = () => {
             >
               New Arrivals
             </motion.h2>
-            
+
             <div className="category-tabs">
               <button
-                className={`category-tab ${selectedCategory === 'all' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('all')}
+                className={`category-tab ${selectedCategory === "all" ? "active" : ""}`}
+                onClick={() => setSelectedCategory("all")}
               >
                 All
               </button>
               <button
-                className={`category-tab ${selectedCategory === 'women' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('women')}
+                className={`category-tab ${selectedCategory === "women" ? "active" : ""}`}
+                onClick={() => setSelectedCategory("women")}
               >
                 Women
               </button>
               <button
-                className={`category-tab ${selectedCategory === 'men' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('men')}
+                className={`category-tab ${selectedCategory === "men" ? "active" : ""}`}
+                onClick={() => setSelectedCategory("men")}
               >
                 Men
               </button>
               <button
-                className={`category-tab ${selectedCategory === 'accessories' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('accessories')}
+                className={`category-tab ${selectedCategory === "accessories" ? "active" : ""}`}
+                onClick={() => setSelectedCategory("accessories")}
               >
                 Accessories
               </button>
@@ -141,11 +153,15 @@ const Home = () => {
           {loading ? (
             <div className="products-grid">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="skeleton" style={{ height: '500px' }}></div>
+                <div
+                  key={i}
+                  className="skeleton"
+                  style={{ height: "500px" }}
+                ></div>
               ))}
             </div>
           ) : (
-            <motion.div 
+            <motion.div
               className="products-grid"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -214,7 +230,11 @@ const Home = () => {
           {loading ? (
             <div className="products-grid">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="skeleton" style={{ height: '500px' }}></div>
+                <div
+                  key={i}
+                  className="skeleton"
+                  style={{ height: "500px" }}
+                ></div>
               ))}
             </div>
           ) : (
