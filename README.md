@@ -1,4 +1,4 @@
-# TRIVÉ
+# TRIVE - Premium Fashion E-Commerce Platform
 
 A production-ready, full-featured fashion e-commerce frontend built with React, Bootstrap 5, and modern web technologies.
 

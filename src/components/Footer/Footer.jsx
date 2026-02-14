@@ -73,16 +73,12 @@ const Footer = () => {
         <div className="footer-bottom">
           <div className="footer-bottom-left">
             <div className="footer-logo">
-              <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
-                <path
-                  d="M8 15 L20 35 L20 15 L32 35"
-                  stroke="#a0a0a0"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg width="28" height="28" viewBox="0 0 200 200" fill="none">
+                <path d="M30 40 L80 40 M55 40 L55 130" stroke="#a0a0a0" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M90 40 L90 130 M90 40 L120 40 Q135 40 135 55 Q135 70 120 70 L90 70 M120 70 L135 130" stroke="#a0a0a0" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M145 40 L165 130 L185 40" stroke="#a0a0a0" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span>TRIVÉ</span>
+              <span>TRIVE</span>
             </div>
             <p>&copy; 2026 NOIR. All rights reserved.</p>
           </div>

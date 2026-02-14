@@ -5,6 +5,8 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import CartDrawer from '../CartDrawer/CartDrawer';
 
+
+
 const BottomHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,21 +50,11 @@ const BottomHeader = () => {
 
             {/* Logo */}
             <Link to="/" className="logo">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: 'spring', stiffness: 300 }}
-              >
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                  <path
-                    d="M8 15 L20 35 L20 15 L32 35"
-                    stroke="#010101"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="logo-text">TRIVÉ</span>
-              </motion.div>
+              <img 
+                src="src\img\Logo.png" 
+                alt="TRIVÉ" 
+                className="logo-image"
+              />
             </Link>
 
             {/* Desktop Navigation */}
@@ -95,7 +87,7 @@ const BottomHeader = () => {
               {/* Login/Account */}
               <Link 
                 to={isAuthenticated ? '/account' : '/login'}
-                className="action-btn"
+                className="action-btn login-btn"
                 aria-label="Account"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -182,6 +174,19 @@ const BottomHeader = () => {
                     {link.name}
                   </Link>
                 ))}
+                
+                {/* Login item - Mobile only */}
+                <Link 
+                  to={isAuthenticated ? '/account' : '/login'}
+                  className="mobile-nav-link mobile-nav-login"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <span>{isAuthenticated ? 'Account' : 'Login'}</span>
+                </Link>
               </nav>
             </motion.div>
           )}
