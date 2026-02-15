@@ -75,6 +75,7 @@ h3 {
   transition: var(--transition-smooth);
   position: relative;
   overflow: hidden;
+  text-decoration: none;
 }
 
 .btn-primary::before {
