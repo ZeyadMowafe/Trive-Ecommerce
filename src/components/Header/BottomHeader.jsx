@@ -1,33 +1,44 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
-import CartDrawer from '../CartDrawer/CartDrawer';
-
-
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
+import CartDrawer from "../CartDrawer/CartDrawer";
 
 const BottomHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { getCartCount, toggleCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/shop?search=${searchQuery}`);
       setIsSearchOpen(false);
-      setSearchQuery('');
+      setSearchQuery("");
+      scrollToTop();
     }
   };
 
+  const handleLinkClick = () => {
+    scrollToTop();
+    setIsMenuOpen(false);
+  };
+
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Shop', path: '/shop' },
-    { name: 'Contact', path: '/contact' }
+    { name: "Home", path: "/" },
+    { name: "Shop", path: "/shop" },
+    { name: "Contact", path: "/contact" },
   ];
 
   return (
@@ -36,12 +47,12 @@ const BottomHeader = () => {
         <div className="container-custom">
           <div className="header-content">
             {/* Mobile Menu Button */}
-            <button 
+            <button
               className="mobile-menu-btn d-lg-none"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
-              <span className={`hamburger ${isMenuOpen ? 'active' : ''}`}>
+              <span className={`hamburger ${isMenuOpen ? "active" : ""}`}>
                 <span></span>
                 <span></span>
                 <span></span>
@@ -50,20 +61,22 @@ const BottomHeader = () => {
 
             {/* Logo */}
             <Link to="/" className="logo">
-              <img 
-                src="src\img\Logo.png" 
-                alt="TRIVÉ" 
+              {" "}
+              <img
+                src="src\img\Logo.png"
+                alt="TRIVÉ"
                 className="logo-image"
-              />
+              />{" "}
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="desktop-nav d-none d-lg-flex">
               {navLinks.map((link, index) => (
-                <Link 
+                <Link
                   key={index}
                   to={link.path}
                   className="nav-link"
+                  onClick={scrollToTop}
                 >
                   {link.name}
                 </Link>
@@ -73,42 +86,64 @@ const BottomHeader = () => {
             {/* Right Actions */}
             <div className="header-actions">
               {/* Search */}
-              <button 
+              <button
                 className="action-btn"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 aria-label="Search"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <circle cx="11" cy="11" r="8"></circle>
                   <path d="m21 21-4.35-4.35"></path>
                 </svg>
               </button>
 
               {/* Login/Account */}
-              <Link 
-                to={isAuthenticated ? '/account' : '/login'}
-                className="action-btn login-btn"
+              <Link
+                to={isAuthenticated ? "/account" : "/login"}
+                className="action-btn"
                 aria-label="Account"
+                onClick={scrollToTop}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
               </Link>
 
               {/* Cart */}
-              <button 
+              <button
                 className="action-btn cart-btn"
                 onClick={toggleCart}
                 aria-label="Shopping cart"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                   <line x1="3" y1="6" x2="21" y2="6"></line>
                   <path d="M16 10a4 4 0 0 1-8 0"></path>
                 </svg>
                 {getCartCount() > 0 && (
-                  <motion.span 
+                  <motion.span
                     className="cart-badge"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -125,10 +160,10 @@ const BottomHeader = () => {
         {/* Search Dropdown */}
         <AnimatePresence>
           {isSearchOpen && (
-            <motion.div 
+            <motion.div
               className="search-dropdown"
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
+              animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
@@ -142,7 +177,14 @@ const BottomHeader = () => {
                     autoFocus
                   />
                   <button type="submit" aria-label="Submit search">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <circle cx="11" cy="11" r="8"></circle>
                       <path d="m21 21-4.35-4.35"></path>
                     </svg>
@@ -156,37 +198,24 @@ const BottomHeader = () => {
         {/* Mobile Menu */}
         <AnimatePresence>
           {isMenuOpen && (
-            <motion.div 
+            <motion.div
               className="mobile-menu d-lg-none"
-              initial={{ x: '-100%' }}
+              initial={{ x: "-100%" }}
               animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
             >
               <nav className="mobile-nav">
                 {navLinks.map((link, index) => (
-                  <Link 
+                  <Link
                     key={index}
                     to={link.path}
                     className="mobile-nav-link"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={handleLinkClick}
                   >
                     {link.name}
                   </Link>
                 ))}
-                
-                {/* Login item - Mobile only */}
-                <Link 
-                  to={isAuthenticated ? '/account' : '/login'}
-                  className="mobile-nav-link mobile-nav-login"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                  <span>{isAuthenticated ? 'Account' : 'Login'}</span>
-                </Link>
               </nav>
             </motion.div>
           )}
@@ -194,7 +223,7 @@ const BottomHeader = () => {
 
         {/* Mobile Menu Overlay */}
         {isMenuOpen && (
-          <div 
+          <div
             className="mobile-overlay d-lg-none"
             onClick={() => setIsMenuOpen(false)}
           />

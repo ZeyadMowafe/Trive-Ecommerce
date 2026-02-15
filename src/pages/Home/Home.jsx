@@ -34,6 +34,13 @@ const Home = () => {
     fetchData();
   }, []);
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const newArrivals = products.filter((p) => p.isNew);
   const bestSellers = products.filter((p) => p.isBestSeller);
 
@@ -102,7 +109,7 @@ const Home = () => {
         {/* Shop Now Button - ثابت خارج الـ Swiper */}
         <div className="hero-content" style={{ pointerEvents: "none" }}>
           <div style={{ pointerEvents: "auto", marginTop: "20rem" }}>
-            <Link to="/shop" className="main-btn-home">
+            <Link to="/shop" className="main-btn-home" onClick={scrollToTop}>
               Shop Now
             </Link>
           </div>
@@ -198,7 +205,7 @@ const Home = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <Link to={`/shop/${category.slug}`}>
+                <Link to={`/shop/${category.slug}`} onClick={scrollToTop}>
                   <div className="category-image">
                     <img src={category.image} alt={category.name} />
                     <div className="category-overlay"></div>
@@ -246,7 +253,7 @@ const Home = () => {
           )}
 
           <div className="section-cta">
-            <Link to="/shop" className="btn-outline">
+            <Link to="/shop" className="btn-outline" onClick={scrollToTop}>
               View All Products
             </Link>
           </div>
