@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
+import { useEffect } from "react";
 import "./CartDrawer.css";
-
 
 const CartDrawer = () => {
   const {
@@ -13,6 +13,20 @@ const CartDrawer = () => {
     updateQuantity,
     getCartTotal,
   } = useCart();
+
+  // منع الـ scroll لما الـ cart يفتح
+  useEffect(() => {
+    if (isCartOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    // Cleanup عند unmount
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isCartOpen]);
 
   return (
     <>
@@ -37,7 +51,7 @@ const CartDrawer = () => {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
             >
               <div className="cart-header">
-                <h2>Shopping Bag</h2>
+                <h2>Shopping Cart</h2>
                 <button
                   onClick={closeCart}
                   className="close-btn"

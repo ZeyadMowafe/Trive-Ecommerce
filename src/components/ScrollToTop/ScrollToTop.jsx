@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import './ScrollToTop.css';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "../../context/CartContext";
+import "./ScrollToTop.css";
 
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const { isCartOpen } = useCart();
 
   useEffect(() => {
     const toggleVisibility = () => {
@@ -14,20 +16,20 @@ const ScrollToTop = () => {
       }
     };
 
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    window.addEventListener("scroll", toggleVisibility);
+    return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {isVisible && !isCartOpen && (
         <motion.button
           className="scroll-to-top"
           onClick={scrollToTop}
@@ -38,14 +40,14 @@ const ScrollToTop = () => {
           whileTap={{ scale: 0.95 }}
           aria-label="Scroll to top"
         >
-          <svg 
-            width="24" 
-            height="24" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
             strokeWidth="2"
-            strokeLinecap="round" 
+            strokeLinecap="round"
             strokeLinejoin="round"
           >
             <polyline points="18 15 12 9 6 15"></polyline>
