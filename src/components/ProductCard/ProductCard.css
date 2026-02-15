@@ -75,7 +75,7 @@
 
 .quick-add-btn {
   position: absolute;
-  top: 1rem;
+  bottom: 1rem;
   right: 1rem;
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);

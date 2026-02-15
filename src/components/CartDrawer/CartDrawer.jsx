@@ -1,16 +1,16 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
-import './CartDrawer.css';
+import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+import { useCart } from "../../context/CartContext";
+import "./CartDrawer.css";
 
 const CartDrawer = () => {
-  const { 
-    cartItems, 
-    isCartOpen, 
-    closeCart, 
-    removeFromCart, 
+  const {
+    cartItems,
+    isCartOpen,
+    closeCart,
+    removeFromCart,
     updateQuantity,
-    getCartTotal 
+    getCartTotal,
   } = useCart();
 
   return (
@@ -19,7 +19,7 @@ const CartDrawer = () => {
         {isCartOpen && (
           <>
             {/* Overlay */}
-            <motion.div 
+            <motion.div
               className="cart-overlay"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -28,17 +28,28 @@ const CartDrawer = () => {
             />
 
             {/* Drawer */}
-            <motion.div 
+            <motion.div
               className="cart-drawer"
-              initial={{ x: '100%' }}
+              initial={{ x: "100%" }}
               animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
             >
               <div className="cart-header">
                 <h2>Shopping Bag</h2>
-                <button onClick={closeCart} className="close-btn" aria-label="Close cart">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <button
+                  onClick={closeCart}
+                  className="close-btn"
+                  aria-label="Close cart"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
@@ -47,7 +58,14 @@ const CartDrawer = () => {
 
               {cartItems.length === 0 ? (
                 <div className="cart-empty">
-                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                  <svg
+                    width="80"
+                    height="80"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                  >
                     <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                     <line x1="3" y1="6" x2="21" y2="6"></line>
                     <path d="M16 10a4 4 0 0 1-8 0"></path>
@@ -61,7 +79,7 @@ const CartDrawer = () => {
                 <>
                   <div className="cart-items">
                     {cartItems.map((item) => (
-                      <motion.div 
+                      <motion.div
                         key={item.cartId}
                         className="cart-item"
                         initial={{ opacity: 0, y: 20 }}
@@ -71,49 +89,74 @@ const CartDrawer = () => {
                         <div className="cart-item-image">
                           <img src={item.images[0]} alt={item.name} />
                         </div>
-                        
+
                         <div className="cart-item-details">
                           <h3>{item.name}</h3>
                           <div className="cart-item-meta">
                             <span>Size: {item.size}</span>
                             <span>Color: {item.color}</span>
                           </div>
-                          
+
                           <div className="cart-item-actions">
                             <div className="quantity-control">
-                              <button 
-                                onClick={() => updateQuantity(item.cartId, item.quantity - 1)}
+                              <button
+                                onClick={() =>
+                                  updateQuantity(item.cartId, item.quantity - 1)
+                                }
                                 aria-label="Decrease quantity"
                               >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
                                   <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
                               </button>
                               <span>{item.quantity}</span>
-                              <button 
-                                onClick={() => updateQuantity(item.cartId, item.quantity + 1)}
+                              <button
+                                onClick={() =>
+                                  updateQuantity(item.cartId, item.quantity + 1)
+                                }
                                 aria-label="Increase quantity"
                               >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
                                   <line x1="12" y1="5" x2="12" y2="19"></line>
                                   <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
                               </button>
                             </div>
-                            
-                            <button 
+
+                            <button
                               className="remove-btn"
                               onClick={() => removeFromCart(item.cartId)}
                               aria-label="Remove item"
                             >
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
                                 <polyline points="3 6 5 6 21 6"></polyline>
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                               </svg>
                             </button>
                           </div>
                         </div>
-                        
+
                         <div className="cart-item-price">
                           ${(item.price * item.quantity).toFixed(2)}
                         </div>
@@ -124,19 +167,21 @@ const CartDrawer = () => {
                   <div className="cart-footer">
                     <div className="cart-total">
                       <span>Subtotal</span>
-                      <span className="total-price">${getCartTotal().toFixed(2)}</span>
+                      <span className="total-price">
+                        ${getCartTotal().toFixed(2)}
+                      </span>
                     </div>
-                    
+
                     <div className="cart-actions">
-                      <Link 
-                        to="/cart" 
+                      <Link
+                        to="/cart"
                         onClick={closeCart}
                         className="btn-outline w-100"
                       >
                         View Bag
                       </Link>
-                      <Link 
-                        to="/checkout" 
+                      <Link
+                        to="/checkout"
                         onClick={closeCart}
                         className="btn-primary w-100"
                       >

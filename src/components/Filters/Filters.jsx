@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import './Filters.css';
+import { useState } from "react";
+import "./Filters.css";
 
 const Filters = ({ filters, onFilterChange }) => {
   const [isStockOpen, setIsStockOpen] = useState(true);
@@ -16,24 +16,27 @@ const Filters = ({ filters, onFilterChange }) => {
   return (
     <div className="filters">
       <div className="filter-section">
-        <button 
+        <button
           className="filter-header"
           onClick={() => setIsStockOpen(!isStockOpen)}
         >
           <span>Availability</span>
-          <svg 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
             strokeWidth="2"
-            style={{ transform: isStockOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
+            style={{
+              transform: isStockOpen ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.3s",
+            }}
           >
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
         </button>
-        
+
         {isStockOpen && (
           <div className="filter-content">
             <label className="filter-option">
@@ -41,7 +44,7 @@ const Filters = ({ filters, onFilterChange }) => {
                 type="radio"
                 name="stock"
                 value="all"
-                checked={filters.inStock === 'all'}
+                checked={filters.inStock === "all"}
                 onChange={(e) => handleStockChange(e.target.value)}
               />
               <span>All Products</span>
@@ -51,7 +54,7 @@ const Filters = ({ filters, onFilterChange }) => {
                 type="radio"
                 name="stock"
                 value="in-stock"
-                checked={filters.inStock === 'in-stock'}
+                checked={filters.inStock === "in-stock"}
                 onChange={(e) => handleStockChange(e.target.value)}
               />
               <span>In Stock</span>
@@ -61,7 +64,7 @@ const Filters = ({ filters, onFilterChange }) => {
                 type="radio"
                 name="stock"
                 value="out-of-stock"
-                checked={filters.inStock === 'out-of-stock'}
+                checked={filters.inStock === "out-of-stock"}
                 onChange={(e) => handleStockChange(e.target.value)}
               />
               <span>Out of Stock</span>
@@ -71,71 +74,97 @@ const Filters = ({ filters, onFilterChange }) => {
       </div>
 
       <div className="filter-section">
-        <button 
+        <button
           className="filter-header"
           onClick={() => setIsPriceOpen(!isPriceOpen)}
         >
           <span>Price Range</span>
-          <svg 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
             strokeWidth="2"
-            style={{ transform: isPriceOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
+            style={{
+              transform: isPriceOpen ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.3s",
+            }}
           >
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
         </button>
-        
+
         {isPriceOpen && (
           <div className="filter-content">
-            <div className="price-inputs">
-              <div className="price-input-group">
-                <label>Min</label>
-                <input
-                  type="number"
-                  min="0"
-                  max={filters.maxPrice}
-                  value={filters.minPrice}
-                  onChange={(e) => handlePriceChange(Number(e.target.value), filters.maxPrice)}
-                />
-              </div>
-              <span className="price-separator">—</span>
-              <div className="price-input-group">
-                <label>Max</label>
-                <input
-                  type="number"
-                  min={filters.minPrice}
-                  max="10000"
-                  value={filters.maxPrice}
-                  onChange={(e) => handlePriceChange(filters.minPrice, Number(e.target.value))}
-                />
-              </div>
+            <div className="price-display-top">
+              <span className="price-label">Selected Range</span>
+              <span className="price-value">
+                ${filters.minPrice} — ${filters.maxPrice}
+              </span>
             </div>
-            
-            <div className="price-range-slider">
+
+            <div className="price-range-container">
+              <div className="price-range-track"></div>
               <input
                 type="range"
                 min="0"
                 max="1000"
                 value={filters.minPrice}
-                onChange={(e) => handlePriceChange(Number(e.target.value), filters.maxPrice)}
-                className="range-slider"
+                onChange={(e) =>
+                  handlePriceChange(Number(e.target.value), filters.maxPrice)
+                }
+                className="range-slider range-slider-min"
               />
               <input
                 type="range"
                 min="0"
                 max="1000"
                 value={filters.maxPrice}
-                onChange={(e) => handlePriceChange(filters.minPrice, Number(e.target.value))}
-                className="range-slider"
+                onChange={(e) =>
+                  handlePriceChange(filters.minPrice, Number(e.target.value))
+                }
+                className="range-slider range-slider-max"
               />
             </div>
-            
-            <div className="price-display">
-              ${filters.minPrice} - ${filters.maxPrice}
+
+            <div className="price-inputs">
+              <div className="price-input-group">
+                <label>Minimum</label>
+                <div className="price-input-wrapper">
+                  <span className="currency-symbol">$</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max={filters.maxPrice}
+                    value={filters.minPrice}
+                    onChange={(e) =>
+                      handlePriceChange(
+                        Number(e.target.value),
+                        filters.maxPrice,
+                      )
+                    }
+                  />
+                </div>
+              </div>
+              <div className="price-input-group">
+                <label>Maximum</label>
+                <div className="price-input-wrapper">
+                  <span className="currency-symbol">$</span>
+                  <input
+                    type="number"
+                    min={filters.minPrice}
+                    max="1000"
+                    value={filters.maxPrice}
+                    onChange={(e) =>
+                      handlePriceChange(
+                        filters.minPrice,
+                        Number(e.target.value),
+                      )
+                    }
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}

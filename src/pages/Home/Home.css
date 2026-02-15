@@ -150,25 +150,26 @@ a.btn-outline:hover {
 
 /* Swiper Custom Styling */
 .hero-swiper .swiper-pagination {
-  bottom: 30px;
+  bottom: 20px;
 }
 
 .custom-bullet {
   background-color: rgba(255, 255, 255, 0.5);
   opacity: 1;
-  width: 12px;
-  height: 12px;
-  margin: 0 8px;
+  width: 8px;
+  height: 8px;
+  margin: 0 6px;
   transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.8);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
 }
 
 .custom-bullet-active {
   background-color: #000000;
   border-color: #ffffff;
-  width: 40px;
-  border-radius: 6px;
-  transform: scale(1.1);
+  width: 30px;
+  height: 8px;
+  border-radius: 4px;
+  transform: scale(1);
 }
 
 /* Section Headers */

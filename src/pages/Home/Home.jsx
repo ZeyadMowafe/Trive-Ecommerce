@@ -103,7 +103,7 @@ const Home = () => {
         <div className="hero-content" style={{ pointerEvents: "none" }}>
           <div style={{ pointerEvents: "auto", marginTop: "20rem" }}>
             <Link to="/shop" className="btn-primary">
-              Shop Nowzz
+              Shop Now
             </Link>
           </div>
         </div>
