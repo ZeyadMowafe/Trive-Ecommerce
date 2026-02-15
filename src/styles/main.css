@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 :root {
   --primary-dark: #010101;
   --secondary-gray: #a0a0a0;
@@ -8,8 +10,8 @@
   --border-color: #e5e5e5;
   --accent-hover: #2a2a2a;
   
-  --font-display: 'Cormorant Garamond', serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-display: "Montserrat", sans-serif;
+  --font-body: "Cairo", sans-serif;
   
   --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: all 0.2s ease;

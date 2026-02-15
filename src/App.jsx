@@ -15,6 +15,8 @@ import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import { useState, useEffect } from "react";
 import "./styles/main.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,16 @@ function App() {
             </main>
             <Footer />
             <ScrollToTop />
+
+            <ToastContainer
+              position="top-right"
+              autoClose={2000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              pauseOnHover
+              theme="light"
+            />
           </div>
         </Router>
       </CartProvider>
