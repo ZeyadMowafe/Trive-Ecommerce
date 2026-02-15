@@ -102,7 +102,7 @@ const Home = () => {
         {/* Shop Now Button - ثابت خارج الـ Swiper */}
         <div className="hero-content" style={{ pointerEvents: "none" }}>
           <div style={{ pointerEvents: "auto", marginTop: "20rem" }}>
-            <Link to="/shop" className="btn-primary">
+            <Link to="/shop" className="main-btn-home">
               Shop Now
             </Link>
           </div>

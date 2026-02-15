@@ -111,6 +111,7 @@ h3 {
   text-transform: uppercase;
   cursor: pointer;
   transition: var(--transition-smooth);
+  text-decoration: none;
 }
 
 .btn-outline:hover {
