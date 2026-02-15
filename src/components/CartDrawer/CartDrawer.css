@@ -235,9 +235,3 @@
     height: 110px;
   }
 }
-/* Checkout Button Override */
-.cart-actions .btn-primary {
-  background-color: #000000 !important;
-  color: #ffffff !important;
-  border: 2px solid #000000 !important;
-}
