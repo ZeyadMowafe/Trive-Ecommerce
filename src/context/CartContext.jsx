@@ -24,6 +24,47 @@ export const CartProvider = ({ children }) => {
   }, [cartItems]);
 
   const addToCart = (product, size, color, quantity = 1) => {
+<<<<<<< HEAD
+    setCartItems((prevItems) => {
+=======
+<<<<<<< Updated upstream
+    setCartItems(prevItems => {
+>>>>>>> zeyad
+      const existingItem = prevItems.find(
+        (item) =>
+          item.id === product.id && item.size === size && item.color === color,
+      );
+
+      // if product exist
+      if (existingItem) {
+        toast.success("تمت إضافة قطعة جديدة من المنتج ");
+        return prevItems.map((item) =>
+          item.id === product.id && item.size === size && item.color === color
+            ? { ...item, quantity: item.quantity + quantity }
+            : item,
+        );
+      }
+
+      // new product
+      toast.success("تم إضافة المنتج إلى السلة بنجاح ");
+
+      return [
+        ...prevItems,
+        {
+          ...product,
+          size,
+          color,
+          quantity,
+          cartId: Date.now(),
+        },
+      ];
+    });
+<<<<<<< HEAD
+
+    // open cart drawer
+=======
+    
+=======
     setCartItems((prevItems) => {
       const existingItem = prevItems.find(
         (item) =>
@@ -56,10 +97,18 @@ export const CartProvider = ({ children }) => {
     });
 
     // open cart drawer
+>>>>>>> Stashed changes
+>>>>>>> zeyad
     setIsCartOpen(true);
   };
 
   const removeFromCart = (cartId) => {
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+    setCartItems(prevItems => prevItems.filter(item => item.cartId !== cartId));
+=======
+>>>>>>> zeyad
     setCartItems((prevItems) => {
       const removedItem = prevItems.find((item) => item.cartId === cartId);
 
@@ -69,6 +118,10 @@ export const CartProvider = ({ children }) => {
 
       return prevItems.filter((item) => item.cartId !== cartId);
     });
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> zeyad
   };
 
   const updateQuantity = (cartId, newQuantity) => {
@@ -99,7 +152,10 @@ export const CartProvider = ({ children }) => {
     return cartItems.reduce((count, item) => count + item.quantity, 0);
   };
 
+<<<<<<< HEAD
   // ✨ Function جديدة - تجيب الكمية الموجودة في الكارت لمنتج معين
+=======
+>>>>>>> zeyad
   const getCartQuantity = (productId, size, color) => {
     const item = cartItems.find(
       (item) =>
