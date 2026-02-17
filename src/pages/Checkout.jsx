@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { ordersAPI } from "../services/api";
 import "./Checkout.css";
+import { toast } from "react-toastify";
 
 const GOVERNORATES = [
   { name: "Cairo", shipping: 50 },
@@ -17,6 +18,8 @@ const GOVERNORATES = [
 const Checkout = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
   const navigate = useNavigate();
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   const [form, setForm] = useState({
     email: "",
@@ -31,22 +34,47 @@ const Checkout = () => {
     saveInfo: false,
     smsOffers: false,
     billingSame: true,
+    billingForm: {
+      firstName: "",
+      lastName: "",
+      address: "",
+      city: "",
+      governorate: "",
+      postalCode: "",
+      phone: "",
+    },
   });
 
   const [shippingCost, setShippingCost] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const subtotal = getCartTotal();
-  const total = subtotal + shippingCost;
+  const total = subtotal + shippingCost - discountAmount;
 
-  const handleChange = (e) => {
+  const handleShippingChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  const handleGovernorate = (e) => {
+  const handleBillingChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      billingForm: {
+        ...prev.billingForm,
+        [name]: value,
+      },
+    }));
+  };
+
+  const handleShippingGovernorate = (e) => {
     const gov = GOVERNORATES.find((g) => g.name === e.target.value);
-    setForm({ ...form, governorate: gov.name });
+    if (!gov) return;
+
+    setForm((prev) => ({ ...prev, governorate: gov.name }));
     setShippingCost(gov.shipping);
   };
 
@@ -65,10 +93,10 @@ const Checkout = () => {
       });
 
       clearCart();
-      alert("Order placed successfully");
+      toast.success("تم تأكيد الطلب بنجاح");
       navigate("/");
     } catch {
-      alert("Something went wrong");
+      toast.error("حصل خطأ، حاول مرة تانية");
     } finally {
       setLoading(false);
     }
@@ -79,6 +107,25 @@ const Checkout = () => {
     return null;
   }
 
+  const applyDiscount = () => {
+    const code = discountCode.trim().toUpperCase();
+    let discount = 0;
+
+    // Example codes
+    const validCodes = {
+      TRIVE: 10,
+    };
+
+    if (validCodes[code]) {
+      discount = validCodes[code];
+      setDiscountAmount(discount);
+      toast.success(`تم تطبيق الخصم: ${discount} ج.م`); // هنا ممكن تعمل toast بدل alert
+    } else {
+      setDiscountAmount(0);
+      toast.error("الكود غير صحيح");
+    }
+  };
+
   return (
     <div className="checkout-page">
       <div className="container-custom">
@@ -87,25 +134,29 @@ const Checkout = () => {
           {/* LEFT FORM */}
           <form onSubmit={handleSubmit} className="checkout-form">
             {/* CONTACT */}
-            <div className="form-section">
-              <h2>Contact</h2>
+            <div className="form-section contact-section">
+              <div className="contact-header">
+                <h2>Contact</h2>
+                <a href="/login" type="button" className="btn-contact">
+                  Sign In
+                </a>
+              </div>
               <div className="form-group">
                 <input
                   type="email"
                   name="email"
                   placeholder="Email"
                   value={form.email}
-                  onChange={handleChange}
+                  onChange={handleShippingChange}
                   required
                 />
               </div>
-
               <label className="checkbox">
                 <input
                   type="checkbox"
                   name="smsOffers"
                   checked={form.smsOffers}
-                  onChange={handleChange}
+                  onChange={handleShippingChange}
                 />
                 Email me with news and offers
               </label>
@@ -128,7 +179,7 @@ const Checkout = () => {
                     name="firstName"
                     placeholder="First Name"
                     value={form.firstName}
-                    onChange={handleChange}
+                    onChange={handleShippingChange}
                     required
                   />
                 </div>
@@ -138,7 +189,7 @@ const Checkout = () => {
                     name="lastName"
                     placeholder="Last Name"
                     value={form.lastName}
-                    onChange={handleChange}
+                    onChange={handleShippingChange}
                     required
                   />
                 </div>
@@ -150,7 +201,7 @@ const Checkout = () => {
                   name="address"
                   placeholder="Address"
                   value={form.address}
-                  onChange={handleChange}
+                  onChange={handleShippingChange}
                   required
                 />
               </div>
@@ -161,18 +212,18 @@ const Checkout = () => {
                   name="apartment"
                   placeholder="Apartment (optional)"
                   value={form.apartment}
-                  onChange={handleChange}
+                  onChange={handleShippingChange}
                 />
               </div>
 
-              <div className="form-row">
+              <div className="form-row three-columns">
                 <div className="form-group">
                   <input
                     type="text"
                     name="city"
                     placeholder="City"
                     value={form.city}
-                    onChange={handleChange}
+                    onChange={handleShippingChange}
                     required
                   />
                 </div>
@@ -181,7 +232,7 @@ const Checkout = () => {
                   <select
                     name="governorate"
                     value={form.governorate}
-                    onChange={handleGovernorate}
+                    onChange={handleShippingGovernorate}
                     required
                   >
                     <option value="">Governorate</option>
@@ -197,10 +248,9 @@ const Checkout = () => {
                   <input
                     type="text"
                     name="postalCode"
-                    placeholder="Postal Code"
+                    placeholder="Postal Code (optional)"
                     value={form.postalCode}
-                    onChange={handleChange}
-                    required
+                    onChange={handleShippingChange}
                   />
                 </div>
               </div>
@@ -209,9 +259,9 @@ const Checkout = () => {
                 <input
                   type="tel"
                   name="phone"
-                  placeholder="Phone (required for delivery)"
+                  placeholder="Phone"
                   value={form.phone}
-                  onChange={handleChange}
+                  onChange={handleShippingChange}
                   required
                 />
               </div>
@@ -221,24 +271,14 @@ const Checkout = () => {
                   type="checkbox"
                   name="saveInfo"
                   checked={form.saveInfo}
-                  onChange={handleChange}
+                  onChange={handleShippingChange}
                 />
                 Save this information for next time
-              </label>
-
-              <label className="checkbox">
-                <input
-                  type="checkbox"
-                  name="smsOffers"
-                  checked={form.smsOffers}
-                  onChange={handleChange}
-                />
-                Text me with news and offers
               </label>
             </div>
 
             {/* SHIPPING METHOD */}
-            <div className="form-section">
+            <div className="form-section bordered-box">
               <h2>Shipping method</h2>
               <div className="shipping-box">
                 Shipping to {form.governorate || "—"}: {shippingCost} EGP
@@ -246,7 +286,7 @@ const Checkout = () => {
             </div>
 
             {/* PAYMENT */}
-            <div className="form-section">
+            <div className="form-section bordered-box">
               <h2>Payment</h2>
               <p>All transactions are secure and encrypted.</p>
               <div className="payment-box">
@@ -274,18 +314,149 @@ const Checkout = () => {
                 />
                 Use a different billing address
               </label>
+
+              <div
+                className={`billing-form ${form.billingSame ? "hidden" : "visible"}`}
+              >
+                <div className="form-row two-columns">
+                  <input
+                    type="text"
+                    name="firstName"
+                    placeholder="First Name"
+                    value={form.billingForm.firstName}
+                    onChange={handleBillingChange}
+                    required={!form.billingSame}
+                  />
+                  <input
+                    type="text"
+                    name="lastName"
+                    placeholder="Last Name"
+                    value={form.billingForm.lastName}
+                    onChange={handleBillingChange}
+                    required={!form.billingSame}
+                  />
+                </div>
+                <div className="form-row">
+                  <input
+                    type="text"
+                    name="address"
+                    placeholder="Address"
+                    value={form.billingForm.address}
+                    onChange={handleBillingChange}
+                    required={!form.billingSame}
+                  />
+                </div>
+
+                <div className="form-row three-columns">
+                  <input
+                    type="text"
+                    name="city"
+                    placeholder="City"
+                    value={form.billingForm.city}
+                    onChange={handleBillingChange}
+                    required={!form.billingSame}
+                  />
+
+                  <select
+                    name="governorate"
+                    value={form.billingForm.governorate}
+                    onChange={handleBillingChange}
+                    required={!form.billingSame}
+                  >
+                    <option value="">Governorate</option>
+                    {GOVERNORATES.map((g) => (
+                      <option key={g.name} value={g.name}>
+                        {g.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    name="postalCode"
+                    placeholder="Postal Code"
+                    value={form.billingForm.postalCode}
+                    onChange={handleBillingChange}
+                  />
+                </div>
+                <div className="form-row">
+                  <input
+                    type="tel"
+                    name="phone"
+                    placeholder="Phone"
+                    value={form.billingForm.phone}
+                    onChange={handleBillingChange}
+                    required={!form.billingSame}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Order Summary Mobile */}
+            <div className="order-summary-mobile">
+              <h2>Order Summary</h2>
+              {cartItems.map((item) => (
+                <div key={item.cartId} className="summary-item">
+                  <div className="summary-item-image">
+                    <img src={item.images[0]} alt={item.name} />
+                  </div>
+                  <div className="summary-item-details">
+                    <h4>{item.name}</h4>
+                    <p>Qty: {item.quantity}</p>
+                  </div>
+                  <div className="summary-item-price">
+                    {(item.price * item.quantity).toFixed(2)} EGP
+                  </div>
+                </div>
+              ))}
+              <div className="discount-section">
+                <input
+                  type="text"
+                  placeholder="Discount code"
+                  value={discountCode}
+                  onChange={(e) => setDiscountCode(e.target.value)}
+                />
+                <button
+                  type="button"
+                  disabled={!discountCode.trim()}
+                  onClick={applyDiscount}
+                >
+                  Apply
+                </button>
+              </div>
+              <div className="summary-totals">
+                <div className="summary-row">
+                  <span>Subtotal</span>
+                  <span>{subtotal} EGP</span>
+                </div>
+                <div className="summary-row">
+                  <span>Shipping</span>
+                  <span>{shippingCost} EGP</span>
+                </div>
+                <div className="summary-row">
+                  <span>Discount</span>
+                  <span>-{discountAmount} EGP</span>
+                </div>
+
+                <div className="summary-total">
+                  <span>Total</span>
+                  <span>{total} EGP</span>
+                </div>
+              </div>
             </div>
 
             {/* Submit Button */}
-            <button type="submit" disabled={loading} className="btn-primary">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary btn-complete-order"
+            >
               {loading ? "Processing..." : "Complete order"}
             </button>
           </form>
 
-          {/* RIGHT SUMMARY */}
+          {/* RIGHT SUMMARY Desktop */}
           <div className="order-summary">
             <h2>Order Summary</h2>
-
             {cartItems.map((item) => (
               <div key={item.cartId} className="summary-item">
                 <div className="summary-item-image">
@@ -300,6 +471,21 @@ const Checkout = () => {
                 </div>
               </div>
             ))}
+            <div className="discount-section">
+              <input
+                type="text"
+                placeholder="Discount code"
+                value={discountCode}
+                onChange={(e) => setDiscountCode(e.target.value)}
+              />
+              <button
+                type="button"
+                disabled={!discountCode.trim()}
+                onClick={applyDiscount}
+              >
+                Apply
+              </button>
+            </div>
 
             <div className="summary-totals">
               <div className="summary-row">
@@ -310,6 +496,11 @@ const Checkout = () => {
                 <span>Shipping</span>
                 <span>{shippingCost} EGP</span>
               </div>
+              <div className="summary-row">
+                <span>Discount</span>
+                <span>-{discountAmount} EGP</span>
+              </div>
+
               <div className="summary-total">
                 <span>Total</span>
                 <span>{total} EGP</span>
