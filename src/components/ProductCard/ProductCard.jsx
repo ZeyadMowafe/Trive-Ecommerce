@@ -13,17 +13,22 @@ const ProductCard = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Add with default size and color
-    addToCart(product, product.sizes[0], product.colors[0], 1);
+    // Find first available combination
+    const availableItem = product.inventory.find((item) => item.count > 0);
+    if (availableItem) {
+      addToCart(product, availableItem.size, availableItem.color, 1);
 
-    // Show success feedback
-    setQuickAddSuccess(true);
-    setTimeout(() => setQuickAddSuccess(false), 1500);
+      // Show success feedback
+      setQuickAddSuccess(true);
+      setTimeout(() => setQuickAddSuccess(false), 1500);
+    }
   };
+
+  const isSoldOut = product.count === 0;
 
   return (
     <motion.div
-      className="product-card"
+      className={`product-card ${isSoldOut ? "sold-out" : ""}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       initial={{ opacity: 0, y: 20 }}
@@ -32,9 +37,16 @@ const ProductCard = ({ product }) => {
     >
       <Link to={`/product/${product.id}`} className="product-link">
         <div className="product-image-wrapper">
-          {product.isNew && <span className="product-badge new">New</span>}
-          {product.isBestSeller && !product.isNew && (
-            <span className="product-badge bestseller">Best Seller</span>
+          {/* Show Sold Out badge if product is completely sold out */}
+          {isSoldOut ? (
+            <span className="product-badge sold-out-badge">Sold Out</span>
+          ) : (
+            <>
+              {product.isNew && <span className="product-badge new">New</span>}
+              {product.isBestSeller && !product.isNew && (
+                <span className="product-badge bestseller">Best Seller</span>
+              )}
+            </>
           )}
 
           <div className="product-images">
@@ -52,41 +64,23 @@ const ProductCard = ({ product }) => {
             )}
           </div>
 
-          <button
-            className={`quick-add-btn ${quickAddSuccess ? "success" : ""}`}
-            onClick={handleQuickAdd}
-            title="Add to Cart"
-          >
-            {quickAddSuccess ? (
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            ) : (
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <path d="M16 10a4 4 0 0 1-8 0"></path>
-              </svg>
-            )}
-          </button>
+          {/* Choose Options Button - Only show if not sold out */}
+          {!isSoldOut && (
+            <motion.div
+              className="choose-options-btn"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{
+                opacity: isHovered ? 1 : 0,
+                y: isHovered ? 0 : 20,
+              }}
+              transition={{
+                duration: 0.4,
+                ease: [0.4, 0, 0.2, 1],
+              }}
+            >
+              <span>Choose Options</span>
+            </motion.div>
+          )}
         </div>
 
         <div className="product-info">
@@ -137,7 +131,10 @@ const ProductCard = ({ product }) => {
                                                     : color.toLowerCase() ===
                                                         "sky blue"
                                                       ? "#87ceeb"
-                                                      : "#ccc",
+                                                      : color.toLowerCase() ===
+                                                          "khaki"
+                                                        ? "#f0e68c"
+                                                        : "#ccc",
                     border:
                       color.toLowerCase() === "white" ||
                       color.toLowerCase() === "cream" ||
