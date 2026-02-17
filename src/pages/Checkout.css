@@ -2,12 +2,6 @@
   padding: 3rem 0 4rem;
 }
 
-.container-custom {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
 .checkout-layout {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
@@ -30,7 +24,7 @@
   font-family: var(--font-display);
   font-size: 1.75rem;
   font-weight: 400;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .form-row {
@@ -41,6 +35,29 @@
 
 .form-row.two-columns {
   grid-template-columns: 1fr 1fr;
+}
+
+.form-row.three-columns {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  outline: none;
+  transition: var(--transition-fast);
+  border-radius: 4px;
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  border-color: var(--primary-dark);
 }
 
 .form-group {
@@ -84,12 +101,63 @@
   margin-bottom: 1rem;
 }
 
-
 .checkout-form button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
+/* Contact section */
+.contact-section .contact-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.contact-section .contact-header h2 {
+  margin-bottom: 0px !important;
+}
+
+.contact-section .btn-contact {
+  background: none;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+/* Bordered Shipping & Payment */
+.bordered-box .shipping-box,
+.bordered-box .payment-box {
+  border: 1px solid #000;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+/* Billing form transition */
+.billing-form {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fafafa;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
+}
+
+.billing-form.visible {
+  max-height: 1000px; /* enough to show content */
+  opacity: 1;
+}
+
+/* btn complete order */
+.btn-complete-order {
+  width: 100%;
+}
+
+/* Desktop Order Summary */
 .order-summary {
   position: sticky;
   top: 130px;
@@ -99,18 +167,29 @@
   border-radius: 8px;
 }
 
-.order-summary h2 {
+/* Mobile Order Summary */
+.order-summary-mobile {
+  display: none;
+  background-color: var(--bg-light);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.order-summary h2,
+.order-summary-mobile h2 {
   font-family: var(--font-display);
   font-size: 1.75rem;
   font-weight: 400;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .summary-item {
   display: grid;
   grid-template-columns: 60px 1fr auto;
   gap: 1rem;
-  padding: 1rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -143,15 +222,46 @@
   font-weight: 600;
 }
 
+.discount-section {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.discount-section input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: var(--font-body);
+  background: none;
+}
+
+.discount-section button {
+  padding: 0.75rem 1rem;
+  border: none;
+  background-color: black;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.discount-section button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
 .summary-totals {
-  padding-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--border-color);
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .summary-total {
@@ -164,20 +274,33 @@
   font-weight: 600;
 }
 
+/* Responsive adjustments */
 @media (max-width: 992px) {
   .checkout-layout {
     grid-template-columns: 1fr;
   }
   .order-summary {
-    position: static;
-    margin-top: 2rem;
+    display: none; /* hide desktop summary */
+  }
+  .order-summary-mobile {
+    display: block;
   }
 }
 
 @media (max-width: 768px) {
   .form-row,
-  .form-row.two-columns {
+  .form-row.two-columns,
+  .form-row.three-columns {
     grid-template-columns: 1fr;
-    gap: 0;
+    gap: 0.5rem;
+  }
+
+  .contact-section .contact-inputs {
+    flex-direction: column;
+  }
+
+  .sign-in-btn {
+    width: 100%;
+    margin-top: 0.5rem;
   }
 }

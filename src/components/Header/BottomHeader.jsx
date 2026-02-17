@@ -128,7 +128,7 @@ const BottomHeader = () => {
 
             {/* Logo */}
             <Link to="/" className="logo">
-              <img src="src/img/Logo.png" alt="TRIVÉ" className="logo-image" />
+              <img src="src\assets\img\Logo.png" alt="TRIVÉ" className="logo-image" />
             </Link>
 
             {/* Desktop Navigation */}
