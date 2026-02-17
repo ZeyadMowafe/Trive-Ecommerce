@@ -13,13 +13,6 @@ const BottomHeader = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -28,6 +21,13 @@ const BottomHeader = () => {
       setSearchQuery("");
       scrollToTop();
     }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const handleLinkClick = () => {
@@ -61,12 +61,7 @@ const BottomHeader = () => {
 
             {/* Logo */}
             <Link to="/" className="logo">
-              {" "}
-              <img
-                src="src\img\Logo.png"
-                alt="TRIVÉ"
-                className="logo-image"
-              />{" "}
+              <img src="src\img\Logo.png" alt="TRIVÉ" className="logo-image" />
             </Link>
 
             {/* Desktop Navigation */}
@@ -76,7 +71,7 @@ const BottomHeader = () => {
                   key={index}
                   to={link.path}
                   className="nav-link"
-                  onClick={scrollToTop}
+                  onClick={handleLinkClick}
                 >
                   {link.name}
                 </Link>
@@ -107,9 +102,9 @@ const BottomHeader = () => {
               {/* Login/Account */}
               <Link
                 to={isAuthenticated ? "/account" : "/login"}
-                className="action-btn"
+                className="action-btn login-btn"
                 aria-label="Account"
-                onClick={scrollToTop}
+                onClick={handleLinkClick}
               >
                 <svg
                   width="20"
@@ -211,11 +206,31 @@ const BottomHeader = () => {
                     key={index}
                     to={link.path}
                     className="mobile-nav-link"
-                    onClick={handleLinkClick}
+                    onClick={() => setIsMenuOpen(false)}
                   >
                     {link.name}
                   </Link>
                 ))}
+
+                {/* Login item - Mobile only */}
+                <Link
+                  to={isAuthenticated ? "/account" : "/login"}
+                  className="mobile-nav-link mobile-nav-login"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <span>{isAuthenticated ? "Account" : "Login"}</span>
+                </Link>
               </nav>
             </motion.div>
           )}

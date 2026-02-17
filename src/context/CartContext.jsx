@@ -24,58 +24,52 @@ export const CartProvider = ({ children }) => {
   }, [cartItems]);
 
   const addToCart = (product, size, color, quantity = 1) => {
-  setCartItems(prevItems => {
-    const existingItem = prevItems.find(
-      item =>
-        item.id === product.id &&
-        item.size === size &&
-        item.color === color
-    );
-
-    // if product exist
-    if (existingItem) {
-      toast.success("تمت إضافة قطعة جديدة من المنتج ");
-      return prevItems.map(item =>
-        item.id === product.id &&
-        item.size === size &&
-        item.color === color
-          ? { ...item, quantity: item.quantity + quantity }
-          : item
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find(
+        (item) =>
+          item.id === product.id && item.size === size && item.color === color,
       );
-    }
 
-    // new product
-    toast.success("تم إضافة المنتج إلى السلة بنجاح ");
+      // if product exist
+      if (existingItem) {
+        toast.success("تمت إضافة قطعة جديدة من المنتج ");
+        return prevItems.map((item) =>
+          item.id === product.id && item.size === size && item.color === color
+            ? { ...item, quantity: item.quantity + quantity }
+            : item,
+        );
+      }
 
-    return [
-      ...prevItems,
-      {
-        ...product,
-        size,
-        color,
-        quantity,
-        cartId: Date.now(),
-      },
-    ];
-  });
+      // new product
+      toast.success("تم إضافة المنتج إلى السلة بنجاح ");
 
-  // open cart drawer
-  setIsCartOpen(true);
-};
+      return [
+        ...prevItems,
+        {
+          ...product,
+          size,
+          color,
+          quantity,
+          cartId: Date.now(),
+        },
+      ];
+    });
 
+    // open cart drawer
+    setIsCartOpen(true);
+  };
 
   const removeFromCart = (cartId) => {
-  setCartItems(prevItems => {
-    const removedItem = prevItems.find(item => item.cartId === cartId);
+    setCartItems((prevItems) => {
+      const removedItem = prevItems.find((item) => item.cartId === cartId);
 
-    if (removedItem) {
-      toast.info(`تم حذف "${removedItem.name}" من السلة `);
-    }
+      if (removedItem) {
+        toast.info(`تم حذف "${removedItem.name}" من السلة `);
+      }
 
-    return prevItems.filter(item => item.cartId !== cartId);
-  });
-};
-
+      return prevItems.filter((item) => item.cartId !== cartId);
+    });
+  };
 
   const updateQuantity = (cartId, newQuantity) => {
     if (newQuantity < 1) {
@@ -105,6 +99,15 @@ export const CartProvider = ({ children }) => {
     return cartItems.reduce((count, item) => count + item.quantity, 0);
   };
 
+  // ✨ Function جديدة - تجيب الكمية الموجودة في الكارت لمنتج معين
+  const getCartQuantity = (productId, size, color) => {
+    const item = cartItems.find(
+      (item) =>
+        item.id === productId && item.size === size && item.color === color,
+    );
+    return item ? item.quantity : 0;
+  };
+
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
   };
@@ -121,6 +124,7 @@ export const CartProvider = ({ children }) => {
     clearCart,
     getCartTotal,
     getCartCount,
+    getCartQuantity,
     isCartOpen,
     toggleCart,
     closeCart,

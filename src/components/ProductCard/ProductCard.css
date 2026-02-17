@@ -43,6 +43,11 @@
   color: white;
 }
 
+.product-badge.sold-out-badge {
+  background-color: #dc3545;
+  color: white;
+}
+
 .product-images {
   position: relative;
   width: 100%;
@@ -73,59 +78,33 @@
   transform: scale(1.03);
 }
 
-.quick-add-btn {
+/* Choose Options Button */
+.choose-options-btn {
   position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  background-color: rgba(255, 255, 255, 0.9);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(10px);
-  color: var(--primary-dark);
-  border: 1.5px solid transparent;
-  padding: 0.5rem;
+  color: white;
+  border: none;
+  padding: 1rem;
   cursor: pointer;
   z-index: 3;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  opacity: 1;
+  text-align: center;
 }
 
-.quick-add-btn:hover {
+.choose-options-btn:hover {
   background-color: #000000;
-  color: #ffffff;
-  border-color: #000000;
-  transform: scale(1.08) rotate(5deg);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
-.quick-add-btn.success {
-  background-color: #28a745;
-  color: white;
-  border-color: #28a745;
-  animation: successPulse 0.6s ease;
-}
-
-@keyframes successPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.15);
-  }
-}
-
-.quick-add-btn svg {
-  flex-shrink: 0;
-  transition: transform 0.3s ease;
-}
-
-.quick-add-btn:hover svg {
-  transform: scale(1.1);
+  letter-spacing: 2px;
+  padding: 1.1rem 1rem;
 }
 
 .product-info {
@@ -210,6 +189,17 @@
   border-color: var(--primary-dark);
 }
 
+/* Sold Out Card - Can still click */
+.product-card.sold-out .product-name,
+.product-card.sold-out .product-category,
+.product-card.sold-out .product-price {
+  opacity: 0.7;
+}
+
+.product-card.sold-out .color-dot {
+  opacity: 0.5;
+}
+
 @media (max-width: 768px) {
   .product-card:hover {
     transform: translateY(-2px);
@@ -222,15 +212,14 @@
     font-size: 0.7rem;
   }
   
-  .quick-add-btn {
-    width: 36px;
-    height: 36px;
-    padding: 0.45rem;
+  .choose-options-btn {
+    padding: 0.85rem;
+    font-size: 0.8rem;
   }
   
-  .quick-add-btn svg {
-    width: 14px;
-    height: 14px;
+  .choose-options-btn:hover {
+    padding: 0.95rem 0.85rem;
+    letter-spacing: 1.5px;
   }
   
   .product-info {
