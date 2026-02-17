@@ -24,6 +24,10 @@ export const CartProvider = ({ children }) => {
   }, [cartItems]);
 
   const addToCart = (product, size, color, quantity = 1) => {
+    const inventoryItem = product.inventory?.find(
+      (i) => i.size === size && i.color === color,
+    );
+    const stockAvailable = inventoryItem ? inventoryItem.count : 0;
     setCartItems((prevItems) => {
       const existingItem = prevItems.find(
         (item) =>
@@ -32,12 +36,23 @@ export const CartProvider = ({ children }) => {
 
       // if product exist
       if (existingItem) {
+        const newQuantity = existingItem.quantity + quantity;
+        if (newQuantity > stockAvailable) {
+          toast.warning(`عذراً! الحد الأقصى المتاح هو ${stockAvailable} قطعة`);
+          return prevItems;
+        }
+
         toast.success("تمت إضافة قطعة جديدة من المنتج ");
         return prevItems.map((item) =>
           item.id === product.id && item.size === size && item.color === color
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: newQuantity }
             : item,
         );
+      }
+
+      if (quantity > stockAvailable) {
+        toast.warning(`عذراً! الحد الأقصى المتاح هو ${stockAvailable} قطعة`);
+        return prevItems;
       }
 
       // new product
@@ -50,6 +65,7 @@ export const CartProvider = ({ children }) => {
           size,
           color,
           quantity,
+          stockAvailable,
           cartId: Date.now(),
         },
       ];
@@ -77,11 +93,23 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.cartId === cartId ? { ...item, quantity: newQuantity } : item,
-      ),
-    );
+    setCartItems((prevItems) => {
+      const item = prevItems.find((item) => item.cartId === cartId);
+
+      if (!item) return prevItems;
+
+      // Check if the new quantity exceeds the available stock
+      if (newQuantity > item.stockAvailable) {
+        toast.warning(
+          `عذراً! الحد الأقصى المتاح هو ${item.stockAvailable} قطعة`,
+        );
+        return prevItems;
+      }
+
+      return prevItems.map((i) =>
+        i.cartId === cartId ? { ...i, quantity: newQuantity } : i,
+      );
+    });
   };
 
   const clearCart = () => {

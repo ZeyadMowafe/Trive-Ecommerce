@@ -13,6 +13,7 @@ import Checkout from "./pages/Checkout";
 import ContactUs from "./pages/ContactUs";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
+import ScrollTop from "./components/ScrollToTop/ScrollTopAllApp.jsx";
 import { useState, useEffect } from "react";
 import "./styles/main.css";
 import { ToastContainer } from "react-toastify";
@@ -38,6 +39,7 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <Router>
+          <ScrollTop />
           <div className="app">
             <Header />
             <main className="main-content">

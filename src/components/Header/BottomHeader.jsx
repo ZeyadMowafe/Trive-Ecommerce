@@ -1,17 +1,76 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
+import { productsAPI } from "../../services/api";
 import CartDrawer from "../CartDrawer/CartDrawer";
+import "./Header.css";
 
 const BottomHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const { getCartCount, toggleCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const searchRef = useRef(null);
+
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Live search effect
+  useEffect(() => {
+    const searchProducts = async () => {
+      if (searchQuery.trim().length === 0) {
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
+
+      setIsSearching(true);
+
+      try {
+        const response = await productsAPI.getAll();
+        const filtered = response.products.filter(
+          (product) =>
+            product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.category
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            product.subcategory
+              ?.toLowerCase()
+              .includes(searchQuery.toLowerCase()),
+        );
+
+        setSearchResults(filtered.slice(0, 5));
+      } catch (error) {
+        console.error("Search error:", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      searchProducts();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -19,19 +78,27 @@ const BottomHeader = () => {
       navigate(`/shop?search=${searchQuery}`);
       setIsSearchOpen(false);
       setSearchQuery("");
-      scrollToTop();
+      setSearchResults([]);
     }
   };
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
+    setIsSearchOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
+  const handleViewAllResults = () => {
+    if (searchQuery.trim()) {
+      navigate(`/shop?search=${searchQuery}`);
+      setIsSearchOpen(false);
+      setSearchQuery("");
+      setSearchResults([]);
+    }
   };
 
   const handleLinkClick = () => {
-    scrollToTop();
     setIsMenuOpen(false);
   };
 
@@ -61,7 +128,7 @@ const BottomHeader = () => {
 
             {/* Logo */}
             <Link to="/" className="logo">
-              <img src="src\img\Logo.png" alt="TRIVÉ" className="logo-image" />
+              <img src="src/img/Logo.png" alt="TRIVÉ" className="logo-image" />
             </Link>
 
             {/* Desktop Navigation */}
@@ -156,6 +223,7 @@ const BottomHeader = () => {
         <AnimatePresence>
           {isSearchOpen && (
             <motion.div
+              ref={searchRef}
               className="search-dropdown"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
@@ -185,6 +253,67 @@ const BottomHeader = () => {
                     </svg>
                   </button>
                 </form>
+
+                {/* Live Search Results */}
+                {searchQuery.trim().length > 0 && (
+                  <div className="search-results">
+                    {isSearching ? (
+                      <div className="search-loading">
+                        <div className="spinner"></div>
+                        <span>Searching...</span>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <>
+                        <div className="results-list">
+                          {searchResults.map((product) => (
+                            <div
+                              key={product.id}
+                              className="search-result-item"
+                              onClick={() => handleProductClick(product.id)}
+                            >
+                              <div className="result-image">
+                                <img
+                                  src={product.images[0]}
+                                  alt={product.name}
+                                />
+                              </div>
+                              <div className="result-info">
+                                <h4>{product.name}</h4>
+                                <p className="result-category">
+                                  {product.subcategory || product.category}
+                                </p>
+                                <span className="result-price">
+                                  ${product.price}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          className="view-all-btn"
+                          onClick={handleViewAllResults}
+                        >
+                          View all results for "{searchQuery}"
+                        </button>
+                      </>
+                    ) : (
+                      <div className="no-results">
+                        <svg
+                          width="48"
+                          height="48"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        >
+                          <circle cx="11" cy="11" r="8"></circle>
+                          <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <p>No products found for "{searchQuery}"</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
