@@ -1,23 +1,28 @@
+/* =========================
+   Checkout Page
+========================= */
+
 .checkout-page {
   padding: 3rem 0 4rem;
 }
 
+/* ===== Layout (Fixed) ===== */
 .checkout-layout {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 3rem;
+  grid-template-columns: 1fr 420px;
+  gap: 4rem;
   align-items: start;
 }
 
+/* ===== Form ===== */
 .checkout-form {
-  background: white;
-  padding: 2rem;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  background: transparent;
+  padding: 0;
+  border: none;
 }
 
 .form-section {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .form-section h2 {
@@ -27,6 +32,7 @@
   margin-bottom: 1rem;
 }
 
+/* ===== Rows ===== */
 .form-row {
   display: grid;
   gap: 1.5rem;
@@ -42,24 +48,7 @@
   gap: 1rem;
 }
 
-.form-row input,
-.form-row select,
-.form-row textarea {
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--border-color);
-  font-family: var(--font-body);
-  font-size: 1rem;
-  outline: none;
-  transition: var(--transition-fast);
-  border-radius: 4px;
-}
-
-.form-row input:focus,
-.form-row select:focus,
-.form-row textarea:focus {
-  border-color: var(--primary-dark);
-}
-
+/* ===== Inputs / Selects (Unified Fix) ===== */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -68,7 +57,10 @@
 
 .form-group input,
 .form-group select,
-.form-group textarea {
+.form-row input,
+.form-row select,
+.discount-section input {
+  width: 100%;
   padding: 0.875rem 1rem;
   border: 1px solid var(--border-color);
   font-family: var(--font-body);
@@ -76,14 +68,17 @@
   outline: none;
   transition: var(--transition-fast);
   border-radius: 4px;
+  background-color: white;
 }
 
 .form-group input:focus,
 .form-group select:focus,
-.form-group textarea:focus {
+.form-row input:focus,
+.form-row select:focus {
   border-color: var(--primary-dark);
 }
 
+/* ===== Checkbox ===== */
 .checkbox {
   display: flex;
   align-items: center;
@@ -92,28 +87,31 @@
   font-size: 0.9rem;
 }
 
+/* ===== Shipping / Payment Boxes ===== */
 .shipping-box,
 .payment-box {
   padding: 1rem;
   border: 1px solid var(--border-color);
   background-color: var(--bg-light);
   border-radius: 4px;
-  margin-bottom: 1rem;
 }
 
-.checkout-form button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* Bordered Sections */
+.bordered-box .shipping-box,
+.bordered-box .payment-box {
+  border: 1px solid #000;
+  background: #fff;
 }
 
-/* Contact section */
+/* ===== Contact Section ===== */
 .contact-section .contact-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .contact-section .contact-header h2 {
-  margin-bottom: 0px !important;
+  margin-bottom: 0 !important;
 }
 
 .contact-section .btn-contact {
@@ -121,20 +119,18 @@
   border: 1px solid var(--primary);
   color: var(--primary);
   font-weight: 600;
+  padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
   transition: 0.3s;
 }
-/* Bordered Shipping & Payment */
-.bordered-box .shipping-box,
-.bordered-box .payment-box {
-  border: 1px solid #000;
-  background: #fff;
-  padding: 1rem;
-  border-radius: 4px;
+
+.contact-section .btn-contact:hover {
+  background: var(--primary);
+  color: #fff;
 }
 
-/* Billing form transition */
+/* ===== Billing Animation ===== */
 .billing-form {
   margin-top: 1rem;
   padding: 1rem;
@@ -148,33 +144,33 @@
 }
 
 .billing-form.visible {
-  max-height: 1000px; /* enough to show content */
+  max-height: 1200px;
   opacity: 1;
 }
 
-/* btn complete order */
-.btn-complete-order {
-  width: 100%;
+/* ===== Buttons ===== */
+.checkout-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* Desktop Order Summary */
+.btn-complete-order {
+  width: 100%;
+  margin-top: 2rem;
+}
+
+/* =========================
+   Order Summary
+========================= */
+
+/* Desktop */
 .order-summary {
   position: sticky;
-  top: 130px;
+  top: 120px;
   background-color: var(--bg-light);
   padding: 2rem;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-}
-
-/* Mobile Order Summary */
-.order-summary-mobile {
-  display: none;
-  background-color: var(--bg-light);
-  padding: 1.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  margin-bottom: 1rem;
 }
 
 .order-summary h2,
@@ -185,6 +181,7 @@
   margin-bottom: 1rem;
 }
 
+/* Items */
 .summary-item {
   display: grid;
   grid-template-columns: 60px 1fr auto;
@@ -222,19 +219,11 @@
   font-weight: 600;
 }
 
+/* Discount */
 .discount-section {
   display: flex;
   gap: 0.5rem;
   margin: 1rem 0;
-}
-
-.discount-section input {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-family: var(--font-body);
-  background: none;
 }
 
 .discount-section button {
@@ -252,7 +241,7 @@
   cursor: not-allowed;
 }
 
-
+/* Totals */
 .summary-totals {
   padding-top: 1rem;
   border-top: 1px solid var(--border-color);
@@ -274,14 +263,32 @@
   font-weight: 600;
 }
 
-/* Responsive adjustments */
+/* =========================
+   Mobile Summary
+========================= */
+.order-summary-mobile {
+  display: none;
+  background-color: var(--bg-light);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+/* =========================
+   Responsive
+========================= */
+
 @media (max-width: 992px) {
   .checkout-layout {
     grid-template-columns: 1fr;
+    gap: 2.5rem;
   }
+
   .order-summary {
-    display: none; /* hide desktop summary */
+    display: none;
   }
+
   .order-summary-mobile {
     display: block;
   }
@@ -292,15 +299,6 @@
   .form-row.two-columns,
   .form-row.three-columns {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .contact-section .contact-inputs {
-    flex-direction: column;
-  }
-
-  .sign-in-btn {
-    width: 100%;
-    margin-top: 0.5rem;
+    gap: 0.75rem;
   }
 }

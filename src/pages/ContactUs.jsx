@@ -71,15 +71,15 @@ const ContactUs = () => {
           <motion.div className="contact-info" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
             <div className="info-item">
               <h3>Visit Us</h3>
-              <p>123 Fashion Street<br/>New York, NY 10001</p>
+              <p>ALmahalah  Al-Kubra ,<br/>Mahalat Abu Ali</p>
             </div>
             <div className="info-item">
               <h3>Call Us</h3>
-              <p>+1 (555) 123-4567</p>
+              <p>+20 10 04012242</p>
             </div>
             <div className="info-item">
               <h3>Email Us</h3>
-              <p>hello@noir.com</p>
+              <p>TriveStore@gmail.com</p>
             </div>
           </motion.div>
         </div>
