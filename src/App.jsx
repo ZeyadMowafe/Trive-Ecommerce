@@ -18,6 +18,8 @@ import { useState, useEffect } from "react";
 import "./styles/main.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ShippingPolicy from "./pages/ShippingPolicy.jsx";
+import ReturnPolicy from "./pages/ReturnPolicy.jsx";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,8 @@ function App() {
                 <Route path="/contact" element={<ContactUs />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/shipping-policy" element={<ShippingPolicy />} />
+                <Route path="/return-policy" element={<ReturnPolicy />} />
               </Routes>
             </main>
             <Footer />
