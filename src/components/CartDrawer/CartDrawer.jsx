@@ -225,7 +225,7 @@ const CartDrawer = () => {
                         onClick={closeCart}
                         className="btn-outline w-100"
                       >
-                        View Bag
+                        View Cart
                       </Link>
                       <Link
                         to="/checkout"
