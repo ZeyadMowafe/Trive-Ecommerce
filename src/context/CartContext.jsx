@@ -1,161 +1,285 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
+import { cartAPI } from "../api/api";
+import { useAuth } from "./AuthContext";
 import { toast } from "react-toastify";
 
-const CartContext = createContext();
+const CartContext = createContext(null);
 
-export const useCart = () => {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error("useCart must be used within CartProvider");
+const CART_STORAGE_KEY = "trive_cart";
+
+const loadLocalCart = () => {
+  try {
+    const data = localStorage.getItem(CART_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
   }
-  return context;
 };
 
-export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState(() => {
-    const savedCart = localStorage.getItem("cart");
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
-  const [isCartOpen, setIsCartOpen] = useState(false);
+const saveLocalCart = (items) => {
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+};
 
-  // Save cart to localStorage whenever it changes
+export function CartProvider({ children }) {
+  const { isAuthenticated } = useAuth();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [synced, setSynced] = useState(false);
+  const prevAuthState = useRef(isAuthenticated);
+
+  const loadCart = useCallback(async () => {
+    if (isAuthenticated) {
+      try {
+        setLoading(true);
+        const cart = await cartAPI.getCart();
+        setItems(cart.items);
+        setSynced(true);
+      } catch {
+        setItems(loadLocalCart());
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setItems(loadLocalCart());
+    }
+  }, [isAuthenticated]);
+
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cartItems));
-  }, [cartItems]);
+    loadCart();
+  }, []);
 
-  const addToCart = (product, size, color, quantity = 1) => {
-    const inventoryItem = product.inventory?.find(
-      (i) => i.size === size && i.color === color,
-    );
-    const stockAvailable = inventoryItem ? inventoryItem.count : 0;
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find(
-        (item) =>
-          item.id === product.id && item.size === size && item.color === color,
-      );
+  useEffect(() => {
+    const justLoggedIn = !prevAuthState.current && isAuthenticated;
+    prevAuthState.current = isAuthenticated;
 
-      // if product exist
-      if (existingItem) {
-        const newQuantity = existingItem.quantity + quantity;
-        if (newQuantity > stockAvailable) {
-          toast.warning(`عذراً! الحد الأقصى المتاح هو ${stockAvailable} قطعة`);
-          return prevItems;
+    if (justLoggedIn) {
+      const syncLocalCartToBackend = async () => {
+        const localItems = loadLocalCart();
+        if (localItems.length > 0) {
+          for (const item of localItems) {
+            try {
+              await cartAPI.addToCart({
+                productId: item.id,
+                variantId: item.variantId || null,
+                quantity: item.quantity,
+              });
+            } catch {
+              // Skip items that fail (e.g., out of stock)
+            }
+          }
+          localStorage.removeItem(CART_STORAGE_KEY);
         }
-
-        toast.success("تمت إضافة قطعة جديدة من المنتج ");
-        return prevItems.map((item) =>
-          item.id === product.id && item.size === size && item.color === color
-            ? { ...item, quantity: newQuantity }
-            : item,
-        );
-      }
-
-      if (quantity > stockAvailable) {
-        toast.warning(`عذراً! الحد الأقصى المتاح هو ${stockAvailable} قطعة`);
-        return prevItems;
-      }
-
-      // new product
-      toast.success("تم إضافة المنتج إلى السلة بنجاح ");
-
-      return [
-        ...prevItems,
-        {
-          ...product,
-          size,
-          color,
-          quantity,
-          stockAvailable,
-          cartId: Date.now(),
-        },
-      ];
-    });
-
-    // open cart drawer
-    setIsCartOpen(true);
-  };
-
-  const removeFromCart = (cartId) => {
-    setCartItems((prevItems) => {
-      const removedItem = prevItems.find((item) => item.cartId === cartId);
-
-      if (removedItem) {
-        toast.info(`تم حذف "${removedItem.name}" من السلة `);
-      }
-
-      return prevItems.filter((item) => item.cartId !== cartId);
-    });
-  };
-
-  const updateQuantity = (cartId, newQuantity) => {
-    if (newQuantity < 1) {
-      removeFromCart(cartId);
-      return;
+        await loadCart();
+      };
+      syncLocalCartToBackend();
     }
 
-    setCartItems((prevItems) => {
-      const item = prevItems.find((item) => item.cartId === cartId);
+    if (prevAuthState.current && !isAuthenticated) {
+      setItems([]);
+      setSynced(false);
+    }
+  }, [isAuthenticated, loadCart]);
 
-      if (!item) return prevItems;
+  useEffect(() => {
+    if (!isAuthenticated) {
+      saveLocalCart(items);
+    }
+  }, [items, isAuthenticated]);
 
-      // Check if the new quantity exceeds the available stock
-      if (newQuantity > item.stockAvailable) {
-        toast.warning(
-          `عذراً! الحد الأقصى المتاح هو ${item.stockAvailable} قطعة`,
-        );
-        return prevItems;
+  const addToCart = useCallback(
+    async ({
+      id,
+      variantId,
+      quantity = 1,
+      name,
+      image,
+      price,
+      size,
+      color,
+      stockAvailable,
+    }) => {
+      if (isAuthenticated) {
+        try {
+          setLoading(true);
+          const cart = await cartAPI.addToCart({
+            productId: id,
+            variantId,
+            quantity,
+          });
+          setItems(cart.items);
+          toast.success("تم إضافة المنتج إلى السلة بنجاح 🛒");
+        } catch {
+          toast.error("حدث خطأ أثناء إضافة المنتج");
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setItems((prev) => {
+          const existing = prev.find(
+            (i) =>
+              i.id === id &&
+              (i.variantId || "default") === (variantId || "default"),
+          );
+
+          if (existing) {
+            const newQuantity = existing.quantity + quantity;
+            if (stockAvailable && newQuantity > stockAvailable) {
+              toast.warning(
+                `عذراً! الحد الأقصى المتاح هو ${stockAvailable} قطعة`,
+              );
+              return prev;
+            }
+            toast.success("تمت إضافة قطعة جديدة من المنتج 🛒");
+            return prev.map((i) =>
+              i.id === id &&
+              (i.variantId || "default") === (variantId || "default")
+                ? { ...i, quantity: newQuantity }
+                : i,
+            );
+          }
+
+          if (stockAvailable && quantity > stockAvailable) {
+            toast.warning(
+              `عذراً! الحد الأقصى المتاح هو ${stockAvailable} قطعة`,
+            );
+            return prev;
+          }
+
+          toast.success("تم إضافة المنتج إلى السلة بنجاح 🛒");
+          return [
+            ...prev,
+            {
+              id,
+              variantId,
+              quantity,
+              name,
+              image,
+              price,
+              size,
+              color,
+              stockAvailable,
+              lineTotal: price * quantity,
+            },
+          ];
+        });
       }
+    },
+    [isAuthenticated],
+  );
 
-      return prevItems.map((i) =>
-        i.cartId === cartId ? { ...i, quantity: newQuantity } : i,
-      );
-    });
-  };
+  const updateQuantity = useCallback(
+    async (itemId, quantity) => {
+      if (isAuthenticated) {
+        try {
+          if (quantity <= 0) {
+            await cartAPI.removeCartItem(itemId);
+            setItems((prev) => prev.filter((i) => i.cartItemId !== itemId));
+            toast.info("تم حذف المنتج من السلة");
+          } else {
+            const cart = await cartAPI.updateCartItem(itemId, quantity);
+            setItems(cart.items);
+          }
+        } catch (err) {
+          console.error("Failed to update cart item", err);
+          toast.error("حدث خطأ أثناء تحديث الكمية");
+        }
+      } else {
+        if (quantity <= 0) {
+          setItems((prev) => {
+            const removedItem = prev.find((i) => i.id === itemId);
+            if (removedItem)
+              toast.info(`تم حذف "${removedItem.name}" من السلة`);
+            return prev.filter((i) => i.id !== itemId);
+          });
+        } else {
+          setItems((prev) => {
+            const item = prev.find((i) => i.id === itemId);
+            if (item?.stockAvailable && quantity > item.stockAvailable) {
+              toast.warning(
+                `عذراً! الحد الأقصى المتاح هو ${item.stockAvailable} قطعة`,
+              );
+              return prev;
+            }
+            return prev.map((i) => (i.id === itemId ? { ...i, quantity } : i));
+          });
+        }
+      }
+    },
+    [isAuthenticated],
+  );
 
-  const clearCart = () => {
-    setCartItems([]);
-  };
+  const removeFromCart = useCallback(
+    async (itemId) => {
+      if (isAuthenticated) {
+        try {
+          await cartAPI.removeCartItem(itemId);
+          setItems((prev) => prev.filter((i) => i.cartItemId !== itemId));
+          toast.info("تم حذف المنتج من السلة");
+        } catch (err) {
+          console.error("Failed to remove cart item", err);
+          toast.error("حدث خطأ أثناء حذف المنتج");
+        }
+      } else {
+        setItems((prev) => {
+          const removedItem = prev.find((i) => i.id === itemId);
+          if (removedItem) toast.info(`تم حذف "${removedItem.name}" من السلة`);
+          return prev.filter((i) => i.id !== itemId);
+        });
+      }
+    },
+    [isAuthenticated],
+  );
 
-  const getCartTotal = () => {
-    return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0,
-    );
-  };
+  const clearCart = useCallback(async () => {
+    if (isAuthenticated) {
+      try {
+        await cartAPI.clearCart();
+      } catch {}
+    }
+    setItems([]);
+    if (!isAuthenticated) localStorage.removeItem(CART_STORAGE_KEY);
+    toast.info("تم تفريغ السلة");
+  }, [isAuthenticated]);
 
-  const getCartCount = () => {
-    return cartItems.reduce((count, item) => count + item.quantity, 0);
-  };
+  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
+  const subtotal = items.reduce(
+    (sum, i) => sum + (i.price || 0) * i.quantity,
+    0,
+  );
+  const isInCart = (productId) => items.some((i) => i.id === productId);
 
-  const getCartQuantity = (productId, size, color) => {
-    const item = cartItems.find(
-      (item) =>
-        item.id === productId && item.size === size && item.color === color,
-    );
-    return item ? item.quantity : 0;
-  };
+  return (
+    <CartContext.Provider
+      value={{
+        items,
+        loading,
+        synced,
+        totalItems,
+        subtotal,
+        isInCart,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        refreshCart: loadCart,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
+}
 
-  const toggleCart = () => {
-    setIsCartOpen(!isCartOpen);
-  };
+export function useCart() {
+  const context = useContext(CartContext);
+  if (!context) throw new Error("useCart must be used within CartProvider");
+  return context;
+}
 
-  const closeCart = () => {
-    setIsCartOpen(false);
-  };
-
-  const value = {
-    cartItems,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    getCartTotal,
-    getCartCount,
-    getCartQuantity,
-    isCartOpen,
-    toggleCart,
-    closeCart,
-  };
-
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
-};
+export default CartContext;
