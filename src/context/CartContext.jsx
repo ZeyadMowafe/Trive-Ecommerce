@@ -6,7 +6,7 @@ import {
   useCallback,
   useRef,
 } from "react";
-import { cartAPI } from "../api/api";
+import { cartAPI } from "../services/api";
 import { useAuth } from "./AuthContext";
 import { toast } from "react-toastify";
 
