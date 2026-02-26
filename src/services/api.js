@@ -136,23 +136,24 @@ export const adaptProduct = (product) => {
   // Build inventory array
   const inventory = variants.length > 0
     ? variants.map((v) => ({
-        variantId: v.id,
-        size: v.size,
-        color: v.color,
-        colorHex: v.color_hex,
-        stock: v.stock_quantity,
-        inStock: v.is_in_stock,
-        price: v.effective_price || v.price,
-        sku: v.sku,
-      }))
-    : [{ size: null, color: null, stock: product.stock_quantity, inStock: product.is_in_stock }];
+      variantId: v.id,
+      size: v.size,
+      color: v.color,
+      colorHex: v.color_hex,
+      count: v.stock_quantity || 0,
+      stock: v.stock_quantity || 0,
+      inStock: v.is_in_stock,
+      price: v.effective_price || v.price,
+      sku: v.sku,
+    }))
+    : [{ size: null, color: null, count: product.stock_quantity || 0, stock: product.stock_quantity || 0, inStock: product.is_in_stock }];
 
   // Build images array
   const images = product.images
     ? product.images.map((img) => img.image_url || img.image)
     : product.primary_image
-    ? [product.primary_image]
-    : [];
+      ? [product.primary_image]
+      : [];
 
   return {
     id: product.id,
@@ -164,7 +165,14 @@ export const adaptProduct = (product) => {
     compareAtPrice: product.compare_at_price ? parseFloat(product.compare_at_price) : null,
     originalPrice: product.compare_at_price ? parseFloat(product.compare_at_price) : parseFloat(product.price),
     discount: product.discount_percentage || 0,
-    category: product.category_name || (product.category?.name) || '',
+    category:
+      product.category_slug ||
+      product.category?.slug ||
+      product.category_name ||
+      (product.category?.name) ||
+      "",
+    categoryName: product.category_name || product.category?.name || "",
+    categorySlug: product.category_slug || product.category?.slug || "",
     categoryId: product.category?.id || product.category,
     image: images[0] || '/placeholder.jpg',
     images,
@@ -233,11 +241,13 @@ export const adaptOrder = (order) => {
 };
 
 export const adaptCartItem = (item) => ({
+  cartId: item.id, // Match CartDrawer
   cartItemId: item.id,
   id: item.product_detail?.id || item.product,
   slug: item.product_detail?.slug,
   name: item.product_detail?.name || '',
   image: item.product_detail?.primary_image || '',
+  images: item.product_detail?.primary_image ? [item.product_detail?.primary_image] : [], // Match CartDrawer
   price: parseFloat(item.unit_price || item.product_detail?.price || 0),
   quantity: item.quantity,
   variantId: item.variant,
@@ -245,6 +255,7 @@ export const adaptCartItem = (item) => ({
   size: item.variant_detail?.size,
   color: item.variant_detail?.color,
   lineTotal: parseFloat(item.line_total || 0),
+  stockAvailable: item.variant_detail?.stock_quantity ?? item.product_detail?.stock_quantity ?? 0,
 });
 
 // ─── Auth API ─────────────────────────────────────────────────────────────────
@@ -397,9 +408,20 @@ export const productsAPI = {
     };
   },
 
+  getAll: async (params = {}) => productsAPI.getProducts(params), // Added alias for BottomHeader
+
   getProduct: async (slug) => {
     const data = await request(`/products/${slug}/`);
     return adaptProduct(data);
+  },
+
+  getById: async (id) => {
+    const data = await request(`/products/${id}/`);
+    return adaptProduct(data);
+  },
+
+  getByCategory: async (category) => {
+    return productsAPI.getProducts({ category });
   },
 
   getFeatured: async () => {
@@ -539,6 +561,8 @@ export const ordersAPI = {
     });
     return adaptOrder(data.order || data);
   },
+
+  create: async (data) => ordersAPI.createOrder(data), // Added alias for Checkout
 
   cancelOrder: async (id) => {
     return request(`/orders/${id}/cancel/`, { method: 'POST' });

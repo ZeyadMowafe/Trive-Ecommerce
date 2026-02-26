@@ -18,7 +18,17 @@ const ProductCard = ({ product }) => {
     // Find first available combination
     const availableItem = product.inventory.find((item) => item.count > 0);
     if (availableItem) {
-      addToCart(product, availableItem.size, availableItem.color, 1);
+      addToCart({
+        id: product.id,
+        variantId: availableItem.variantId,
+        quantity: 1,
+        name: product.name,
+        image: product.image,
+        price: product.price,
+        size: availableItem.size,
+        color: availableItem.color,
+        stockAvailable: availableItem.stock,
+      });
 
       // Show success feedback
       setQuickAddSuccess(true);
@@ -44,7 +54,7 @@ const ProductCard = ({ product }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Link to={`/product/${product.id}`} className="product-link">
+        <Link to={`/product/${product.slug}`} className="product-link">
           <div className="product-image-wrapper">
             {/* Show Sold Out badge if product is completely sold out */}
             {isSoldOut ? (
@@ -93,6 +103,32 @@ const ProductCard = ({ product }) => {
                 <span>Choose Options</span>
               </motion.div>
             )}
+
+            {/* Floating Cart Button (Bottom Right) - Only show if not sold out and has 1 variant */}
+            {!isSoldOut && (
+              <motion.button
+                className={`floating-cart-btn ${quickAddSuccess ? "success" : ""}`}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{
+                  opacity: isHovered || quickAddSuccess ? 1 : 0,
+                  scale: isHovered || quickAddSuccess ? 1 : 0.8,
+                }}
+                onClick={product.inventory.length === 1 ? handleQuickAdd : handleChooseOptions}
+                aria-label="Quick add to cart"
+              >
+                {quickAddSuccess ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                  </svg>
+                )}
+              </motion.button>
+            )}
           </div>
 
           <div className="product-info">
@@ -128,30 +164,30 @@ const ProductCard = ({ product }) => {
                                           : color.toLowerCase() === "ivory"
                                             ? "#fffff0"
                                             : color.toLowerCase() ===
-                                                "dusty rose"
+                                              "dusty rose"
                                               ? "#dcae96"
                                               : color.toLowerCase() === "beige"
                                                 ? "#f5f5dc"
                                                 : color.toLowerCase() ===
-                                                    "burgundy"
+                                                  "burgundy"
                                                   ? "#800020"
                                                   : color.toLowerCase() ===
-                                                      "cognac"
+                                                    "cognac"
                                                     ? "#9a463d"
                                                     : color.toLowerCase() ===
-                                                        "sand"
+                                                      "sand"
                                                       ? "#c2b280"
                                                       : color.toLowerCase() ===
-                                                          "sky blue"
+                                                        "sky blue"
                                                         ? "#87ceeb"
                                                         : color.toLowerCase() ===
-                                                            "khaki"
+                                                          "khaki"
                                                           ? "#f0e68c"
                                                           : "#ccc",
                       border:
                         color.toLowerCase() === "white" ||
-                        color.toLowerCase() === "cream" ||
-                        color.toLowerCase() === "ivory"
+                          color.toLowerCase() === "cream" ||
+                          color.toLowerCase() === "ivory"
                           ? "1px solid #ddd"
                           : "none",
                     }}

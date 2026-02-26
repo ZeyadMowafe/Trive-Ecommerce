@@ -107,6 +107,38 @@
   padding: 1.1rem 1rem;
 }
 
+/* Floating Cart Button */
+.floating-cart-btn {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: white;
+  color: var(--primary-dark);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-cart-btn:hover {
+  transform: scale(1.1);
+  background-color: var(--primary-dark);
+  color: white;
+}
+
+.floating-cart-btn.success {
+  background-color: #28a745;
+  color: white;
+  transform: scale(1.05);
+}
+
 .product-info {
   padding: 0.75rem 0.5rem;
 }
@@ -204,36 +236,36 @@
   .product-card:hover {
     transform: translateY(-2px);
   }
-  
+
   .product-badge {
     top: 0.75rem;
     left: 0.75rem;
     padding: 0.3rem 0.6rem;
     font-size: 0.7rem;
   }
-  
+
   .choose-options-btn {
     padding: 0.85rem;
     font-size: 0.8rem;
   }
-  
+
   .choose-options-btn:hover {
     padding: 0.95rem 0.85rem;
     letter-spacing: 1.5px;
   }
-  
+
   .product-info {
     padding: 0.5rem 0.35rem;
   }
-  
+
   .product-name {
     font-size: 1rem;
   }
-  
+
   .product-price {
     font-size: 1.1rem;
   }
-  
+
   .color-dot {
     width: 18px;
     height: 18px;
