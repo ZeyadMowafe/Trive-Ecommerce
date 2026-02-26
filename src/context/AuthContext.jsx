@@ -1,92 +1,120 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { authAPI, getAccessToken, clearTokens, adaptUser } from '../services/api';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
-};
-
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Fetch current user on mount if token exists
   useEffect(() => {
-    // Check for existing auth token on mount
-    const token = localStorage.getItem('authToken');
-    const savedUser = localStorage.getItem('user');
-    
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-      setIsAuthenticated(true);
-    }
-    
-    setLoading(false);
+    const initAuth = async () => {
+      const token = getAccessToken();
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const userData = await authAPI.getProfile();
+        setUser(userData);
+      } catch (err) {
+        // Token invalid/expired — clearTokens already called by request()
+        clearTokens();
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    initAuth();
   }, []);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (credentials) => {
+    setError(null);
     try {
-      const response = await authAPI.login(email, password);
-      
-      if (response.success) {
-        localStorage.setItem('authToken', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        setUser(response.user);
-        setIsAuthenticated(true);
-        return { success: true };
-      }
-      
-      return { success: false, error: 'Login failed' };
-    } catch (error) {
-      return { success: false, error: error.message };
+      const { user: userData } = await authAPI.login(credentials);
+      setUser(userData);
+      return userData;
+    } catch (err) {
+      setError(err.message);
+      throw err;
     }
-  };
+  }, []);
 
-  const register = async (userData) => {
+  const register = useCallback(async (data) => {
+    setError(null);
     try {
-      const response = await authAPI.register(userData);
-      
-      if (response.success) {
-        localStorage.setItem('authToken', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        setUser(response.user);
-        setIsAuthenticated(true);
-        return { success: true };
-      }
-      
-      return { success: false, error: 'Registration failed' };
-    } catch (error) {
-      return { success: false, error: error.message };
+      const { user: userData } = await authAPI.register(data);
+      setUser(userData);
+      return userData;
+    } catch (err) {
+      setError(err.data || err.message);
+      throw err;
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await authAPI.logout();
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch {
+      // Even if server call fails, clear local state
     } finally {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
+      clearTokens();
       setUser(null);
-      setIsAuthenticated(false);
     }
-  };
+  }, []);
 
-  const value = {
-    user,
-    isAuthenticated,
-    loading,
-    login,
-    register,
-    logout
-  };
+  const updateProfile = useCallback(async (profileData) => {
+    setError(null);
+    try {
+      const updated = await authAPI.updateProfile(profileData);
+      setUser(updated);
+      return updated;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }, []);
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+  const refreshUser = useCallback(async () => {
+    try {
+      const userData = await authAPI.getProfile();
+      setUser(userData);
+      return userData;
+    } catch {
+      return null;
+    }
+  }, []);
 
+  const isAuthenticated = !!user;
+  const isAdmin = user?.isAdmin || false;
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        error,
+        isAuthenticated,
+        isAdmin,
+        login,
+        register,
+        logout,
+        updateProfile,
+        refreshUser,
+        setError,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  return context;
+}
+
+export default AuthContext;
