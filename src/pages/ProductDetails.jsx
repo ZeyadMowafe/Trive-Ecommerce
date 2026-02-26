@@ -139,7 +139,20 @@ const ProductDetails = () => {
 
   const handleAddToCart = () => {
     if (product && selectedSize && selectedColor && availableToAdd > 0) {
-      addToCart(product, selectedSize, selectedColor, quantity);
+      const variant = product.inventory.find(
+        (v) => v.size === selectedSize && v.color === selectedColor,
+      );
+      addToCart({
+        id: product.id,
+        variantId: variant?.variantId,
+        quantity: quantity,
+        name: product.name,
+        image: product.image,
+        price: product.price,
+        size: selectedSize,
+        color: selectedColor,
+        stockAvailable: currentStock,
+      });
     }
   };
 
@@ -273,30 +286,30 @@ const ProductDetails = () => {
                                             : color.toLowerCase() === "ivory"
                                               ? "#fffff0"
                                               : color.toLowerCase() ===
-                                                  "dusty rose"
+                                                "dusty rose"
                                                 ? "#dcae96"
                                                 : color.toLowerCase() ===
-                                                    "beige"
+                                                  "beige"
                                                   ? "#f5f5dc"
                                                   : color.toLowerCase() ===
-                                                      "burgundy"
+                                                    "burgundy"
                                                     ? "#800020"
                                                     : color.toLowerCase() ===
-                                                        "cognac"
+                                                      "cognac"
                                                       ? "#9a463d"
                                                       : color.toLowerCase() ===
-                                                          "sand"
+                                                        "sand"
                                                         ? "#c2b280"
                                                         : color.toLowerCase() ===
-                                                            "sky blue"
+                                                          "sky blue"
                                                           ? "#87ceeb"
                                                           : color.toLowerCase() ===
-                                                              "khaki"
+                                                            "khaki"
                                                             ? "#f0e68c"
                                                             : "#ccc",
                         border:
                           color.toLowerCase() === "white" ||
-                          color.toLowerCase() === "cream"
+                            color.toLowerCase() === "cream"
                             ? "2px solid #ddd"
                             : "none",
                       }}

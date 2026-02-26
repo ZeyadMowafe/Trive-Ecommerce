@@ -10,7 +10,7 @@ const Cart = () => {
     return (
       <div className="cart-empty-page">
         <div className="container-custom">
-          <motion.div 
+          <motion.div
             className="empty-cart-content"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -33,32 +33,34 @@ const Cart = () => {
     <div className="cart-page">
       <div className="container-custom">
         <h1 className="page-title">Shopping Cart</h1>
-        
+
         <div className="cart-layout">
           <div className="cart-items-section">
             {cartItems.map((item) => (
               <div key={item.cartId} className="cart-item-row">
                 <div className="cart-item-image">
-                  <img src={item.images[0]} alt={item.name} />
+                  <Link to={`/product/${item.slug}`}>
+                    <img src={item.images[0]} alt={item.name} />
+                  </Link>
                 </div>
-                
+
                 <div className="cart-item-details">
                   <h3>{item.name}</h3>
                   <p className="item-meta">Size: {item.size} | Color: {item.color}</p>
                   <p className="item-price-mobile">${item.price}</p>
                 </div>
-                
+
                 <div className="cart-item-quantity">
                   <button onClick={() => updateQuantity(item.cartId, item.quantity - 1)}>−</button>
                   <span>{item.quantity}</span>
                   <button onClick={() => updateQuantity(item.cartId, item.quantity + 1)}>+</button>
                 </div>
-                
+
                 <div className="cart-item-price">
                   ${(item.price * item.quantity).toFixed(2)}
                 </div>
-                
-                <button 
+
+                <button
                   className="cart-item-remove"
                   onClick={() => removeFromCart(item.cartId)}
                   aria-label="Remove item"
@@ -71,7 +73,7 @@ const Cart = () => {
               </div>
             ))}
           </div>
-          
+
           <div className="cart-summary">
             <h3>Order Summary</h3>
             <div className="summary-row">

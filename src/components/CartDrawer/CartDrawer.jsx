@@ -103,16 +103,16 @@ const CartDrawer = () => {
                           exit={{ opacity: 0, x: 100 }}
                         >
                           <Link
-                            to={`/product/${item.id}`}
+                            to={`/product/${item.slug}`}
                             onClick={closeCart}
                             className="cart-item-image"
                           >
-                            <img src={item.images[0]} alt={item.name} />
+                            <img src={item.images?.[0] || item.image || '/placeholder.jpg'} alt={item.name} />
                           </Link>
 
                           <div className="cart-item-details">
                             <Link
-                              to={`/product/${item.id}`}
+                              to={`/product/${item.slug}`}
                               onClick={closeCart}
                               className="cart-item-name-link"
                             >

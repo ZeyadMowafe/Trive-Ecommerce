@@ -10,7 +10,8 @@ import "swiper/css/pagination";
 import "./Home.css";
 
 const Home = () => {
-  const [products, setProducts] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [newArrivalsProducts, setNewArrivalsProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -18,11 +19,13 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsData, categoriesData] = await Promise.all([
-          productsAPI.getAll(),
-          categoriesAPI.getAll(),
+        const [featuredData, newArrivalsData, categoriesData] = await Promise.all([
+          productsAPI.getFeatured(),
+          productsAPI.getNewArrivals(),
+          categoriesAPI.getCategories(),
         ]);
-        setProducts(productsData.products);
+        setFeaturedProducts(featuredData);
+        setNewArrivalsProducts(newArrivalsData);
         setCategories(categoriesData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -41,13 +44,16 @@ const Home = () => {
     });
   };
 
-  const newArrivals = products.filter((p) => p.isNew);
-  const bestSellers = products.filter((p) => p.isBestSeller);
-
   const filteredNewArrivals =
     selectedCategory === "all"
-      ? newArrivals
-      : newArrivals.filter((p) => p.category === selectedCategory);
+      ? newArrivalsProducts
+      : newArrivalsProducts.filter(
+        (p) =>
+          p.categorySlug === selectedCategory ||
+          p.categoryName.toLowerCase() === selectedCategory.toLowerCase(),
+      );
+
+  const bestSellers = featuredProducts;
 
   const heroSlides = [
     {

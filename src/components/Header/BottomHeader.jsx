@@ -82,8 +82,8 @@ const BottomHeader = () => {
     }
   };
 
-  const handleProductClick = (productId) => {
-    navigate(`/product/${productId}`);
+  const handleProductClick = (productSlug) => {
+    navigate(`/product/${productSlug}`);
     setIsSearchOpen(false);
     setSearchQuery("");
     setSearchResults([]);
@@ -269,7 +269,7 @@ const BottomHeader = () => {
                             <div
                               key={product.id}
                               className="search-result-item"
-                              onClick={() => handleProductClick(product.id)}
+                              onClick={() => handleProductClick(product.slug)}
                             >
                               <div className="result-image">
                                 <img

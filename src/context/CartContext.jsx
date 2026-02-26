@@ -6,7 +6,7 @@ import {
   useCallback,
   useRef,
 } from "react";
-import { cartAPI } from "../api/api";
+import { cartAPI } from "../services/api";
 import { useAuth } from "./AuthContext";
 import { toast } from "react-toastify";
 
@@ -31,6 +31,7 @@ export function CartProvider({ children }) {
   const { isAuthenticated } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false); // Added
   const [synced, setSynced] = useState(false);
   const prevAuthState = useRef(isAuthenticated);
 
@@ -139,7 +140,7 @@ export function CartProvider({ children }) {
             toast.success("تمت إضافة قطعة جديدة من المنتج 🛒");
             return prev.map((i) =>
               i.id === id &&
-              (i.variantId || "default") === (variantId || "default")
+                (i.variantId || "default") === (variantId || "default")
                 ? { ...i, quantity: newQuantity }
                 : i,
             );
@@ -156,11 +157,13 @@ export function CartProvider({ children }) {
           return [
             ...prev,
             {
+              cartId: `${id}-${variantId || "default"}-${Date.now()}`,
               id,
               variantId,
               quantity,
               name,
               image,
+              images: [image],
               price,
               size,
               color,
@@ -200,14 +203,14 @@ export function CartProvider({ children }) {
           });
         } else {
           setItems((prev) => {
-            const item = prev.find((i) => i.id === itemId);
+            const item = prev.find((i) => i.cartId === itemId);
             if (item?.stockAvailable && quantity > item.stockAvailable) {
               toast.warning(
                 `عذراً! الحد الأقصى المتاح هو ${item.stockAvailable} قطعة`,
               );
               return prev;
             }
-            return prev.map((i) => (i.id === itemId ? { ...i, quantity } : i));
+            return prev.map((i) => (i.cartId === itemId ? { ...i, quantity } : i));
           });
         }
       }
@@ -228,9 +231,9 @@ export function CartProvider({ children }) {
         }
       } else {
         setItems((prev) => {
-          const removedItem = prev.find((i) => i.id === itemId);
+          const removedItem = prev.find((i) => i.cartId === itemId);
           if (removedItem) toast.info(`تم حذف "${removedItem.name}" من السلة`);
-          return prev.filter((i) => i.id !== itemId);
+          return prev.filter((i) => i.cartId !== itemId);
         });
       }
     },
@@ -241,7 +244,7 @@ export function CartProvider({ children }) {
     if (isAuthenticated) {
       try {
         await cartAPI.clearCart();
-      } catch {}
+      } catch { }
     }
     setItems([]);
     if (!isAuthenticated) localStorage.removeItem(CART_STORAGE_KEY);
@@ -255,20 +258,45 @@ export function CartProvider({ children }) {
   );
   const isInCart = (productId) => items.some((i) => i.id === productId);
 
+  const toggleCart = () => setIsCartOpen(!isCartOpen);
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+
+  const getCartCount = () => totalItems;
+  const getCartTotal = () => subtotal;
+
+  const getCartQuantity = (productId, size, color) => {
+    const item = items.find(
+      (i) =>
+        i.id === productId &&
+        (i.size === size || (!i.size && !size)) &&
+        (i.color === color || (!i.color && !color)),
+    );
+    return item ? item.quantity : 0;
+  };
+
   return (
     <CartContext.Provider
       value={{
         items,
+        cartItems: items,
         loading,
         synced,
         totalItems,
+        getCartCount,
         subtotal,
+        getCartTotal,
         isInCart,
         addToCart,
         updateQuantity,
         removeFromCart,
         clearCart,
         refreshCart: loadCart,
+        isCartOpen,
+        toggleCart,
+        openCart,
+        closeCart,
+        getCartQuantity,
       }}
     >
       {children}
