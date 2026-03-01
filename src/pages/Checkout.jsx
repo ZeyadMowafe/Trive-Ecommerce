@@ -90,6 +90,7 @@ const Checkout = () => {
         shipping: shippingCost,
         total,
         paymentMethod: "Cash on Delivery",
+        couponCode: discountCode, // ✨ Pass discount code to API
       });
 
       clearCart();

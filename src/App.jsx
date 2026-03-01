@@ -13,6 +13,9 @@ import Checkout from "./pages/Checkout";
 import ContactUs from "./pages/ContactUs";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
+import Profile from "./pages/Profile/Profile";
+import Orders from "./pages/Orders/Orders";
+import Addresses from "./pages/Addresses/Addresses";
 import ScrollTop from "./components/ScrollToTop/ScrollTopAllApp.jsx";
 import { useState, useEffect } from "react";
 import "./styles/main.css";
@@ -55,6 +58,9 @@ function App() {
                 <Route path="/contact" element={<ContactUs />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/addresses" element={<Addresses />} />
                 <Route path="/shipping-policy" element={<ShippingPolicy />} />
                 <Route path="/return-policy" element={<ReturnPolicy />} />
               </Routes>

@@ -186,8 +186,17 @@
 
 .product-colors {
   display: flex;
-  gap: 0.45rem;
+  gap: 0.35rem;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.colors-more {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-left: 2px;
 }
 
 .color-dot {

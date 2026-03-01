@@ -204,7 +204,7 @@ const CartDrawer = () => {
                           </div>
 
                           <div className="cart-item-price">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            {(item.price * item.quantity).toFixed(2)} EGP
                           </div>
                         </motion.div>
                       );
@@ -215,7 +215,7 @@ const CartDrawer = () => {
                     <div className="cart-total">
                       <span>Subtotal</span>
                       <span className="total-price">
-                        ${getCartTotal().toFixed(2)}
+                        {getCartTotal().toFixed(2)} EGP
                       </span>
                     </div>
 
