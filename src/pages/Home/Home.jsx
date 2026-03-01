@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import { motion } from "framer-motion";
@@ -15,6 +15,17 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash === "#new-arrivals") {
+      const element = document.getElementById("new-arrivals");
+      if (element) {
+        // Simple scrollIntoView as requested/originally intended
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [hash, loading]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,7 +134,7 @@ const Home = () => {
       </section>
 
       {/* New Arrivals Section */}
-      <section className="new-arrivals-section section-padding">
+      <section id="new-arrivals" className="new-arrivals-section section-padding">
         <div className="container-custom">
           <div className="section-header">
             <motion.h2
@@ -142,24 +153,15 @@ const Home = () => {
               >
                 All
               </button>
-              <button
-                className={`category-tab ${selectedCategory === "women" ? "active" : ""}`}
-                onClick={() => setSelectedCategory("women")}
-              >
-                Women
-              </button>
-              <button
-                className={`category-tab ${selectedCategory === "men" ? "active" : ""}`}
-                onClick={() => setSelectedCategory("men")}
-              >
-                Men
-              </button>
-              <button
-                className={`category-tab ${selectedCategory === "accessories" ? "active" : ""}`}
-                onClick={() => setSelectedCategory("accessories")}
-              >
-                Accessories
-              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  className={`category-tab ${selectedCategory === category.slug ? "active" : ""}`}
+                  onClick={() => setSelectedCategory(category.slug)}
+                >
+                  {category.name}
+                </button>
+              ))}
             </div>
           </div>
 

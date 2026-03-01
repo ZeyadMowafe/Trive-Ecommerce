@@ -168,7 +168,7 @@ const BottomHeader = () => {
 
               {/* Login/Account */}
               <Link
-                to={isAuthenticated ? "/account" : "/login"}
+                to={isAuthenticated ? "/profile" : "/login"}
                 className="action-btn login-btn"
                 aria-label="Account"
                 onClick={handleLinkClick}
@@ -343,7 +343,7 @@ const BottomHeader = () => {
 
                 {/* Login item - Mobile only */}
                 <Link
-                  to={isAuthenticated ? "/account" : "/login"}
+                  to={isAuthenticated ? "/profile" : "/login"}
                   className="mobile-nav-link mobile-nav-login"
                   onClick={() => setIsMenuOpen(false)}
                 >

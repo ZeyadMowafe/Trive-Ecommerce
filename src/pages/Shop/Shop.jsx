@@ -13,9 +13,10 @@ const Shop = () => {
 
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [categories, setCategories] = useState([]); //  Added categories state
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  
+
   const [filters, setFilters] = useState({
     inStock: 'all',
     minPrice: 0,
@@ -46,6 +47,22 @@ const Shop = () => {
 
     fetchProducts();
   }, [category, searchQuery]);
+
+  // ✨ Fetch categories to get proper names
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await productsAPI.getProducts(); // Using this to potentially get categories or check api
+        // Actually api.js has categoriesAPI.getCategories
+        const { categoriesAPI } = await import('../../services/api');
+        const categoriesData = await categoriesAPI.getCategories();
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     let result = [...products];
@@ -87,7 +104,11 @@ const Shop = () => {
   const getCategoryTitle = () => {
     if (searchQuery) return `Search Results for "${searchQuery}"`;
     if (category) {
-      return category.charAt(0).toUpperCase() + category.slice(1);
+      const currentCategory = categories.find(c => c.slug === category);
+      if (currentCategory) return currentCategory.name;
+
+      // Fallback to capitalized slug if categories haven't loaded or not found
+      return category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     }
     return 'All Products';
   };
@@ -104,7 +125,7 @@ const Shop = () => {
       <div className="container-custom">
         <div className="shop-container">
           {/* Mobile Filter Button */}
-          <button 
+          <button
             className="mobile-filter-btn d-lg-none"
             onClick={() => setIsFilterOpen(true)}
           >
@@ -125,7 +146,7 @@ const Shop = () => {
           <div className="shop-content">
             {/* Desktop Filters - Left Side */}
             <div className="filters-sidebar d-none d-lg-block">
-              <Filters 
+              <Filters
                 filters={filters}
                 onFilterChange={handleFilterChange}
               />
@@ -135,14 +156,14 @@ const Shop = () => {
             <AnimatePresence>
               {isFilterOpen && (
                 <>
-                  <motion.div 
+                  <motion.div
                     className="filters-overlay d-lg-none"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={() => setIsFilterOpen(false)}
                   />
-                  <motion.div 
+                  <motion.div
                     className="filters-drawer d-lg-none"
                     initial={{ x: '-100%' }}
                     animate={{ x: 0 }}
@@ -158,12 +179,12 @@ const Shop = () => {
                         </svg>
                       </button>
                     </div>
-                    <Filters 
+                    <Filters
                       filters={filters}
                       onFilterChange={handleFilterChange}
                     />
                     <div className="filters-drawer-footer">
-                      <button 
+                      <button
                         className="btn-primary w-100"
                         onClick={() => setIsFilterOpen(false)}
                       >
@@ -179,7 +200,7 @@ const Shop = () => {
             <div className="products-section">
               {/* Sort Dropdown */}
               <div className="shop-controls">
-                <select 
+                <select
                   value={filters.sortBy}
                   onChange={(e) => handleFilterChange({ sortBy: e.target.value })}
                   className="sort-select"
@@ -208,7 +229,7 @@ const Shop = () => {
                   <p>Try adjusting your filters or search criteria</p>
                 </div>
               ) : (
-                <motion.div 
+                <motion.div
                   className="products-grid"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}

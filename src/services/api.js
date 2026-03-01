@@ -61,7 +61,11 @@ async function request(endpoint, options = {}) {
     ...options.headers,
   };
 
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  // Get latest token
+  const currentToken = options._isRetry ? options.headers.Authorization?.split(' ')[1] : getAccessToken();
+  if (currentToken && !headers['Authorization']) {
+    headers['Authorization'] = `Bearer ${currentToken}`;
+  }
 
   const config = { ...options, headers };
 
@@ -74,12 +78,22 @@ async function request(endpoint, options = {}) {
 
   // Handle 401 with token refresh
   if (response.status === 401 && getRefreshToken()) {
+    // If it's a retry already, don't try again to avoid infinite loops
+    if (options._isRetry) {
+      clearTokens();
+      window.dispatchEvent(new CustomEvent('trive_auth_failed'));
+      throw new Error('Authentication failed');
+    }
+
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
       }).then((newToken) => {
-        headers['Authorization'] = `Bearer ${newToken}`;
-        return fetch(url, { ...config, headers });
+        // Create fresh headers for the retry
+        const retryHeaders = { ...headers, 'Authorization': `Bearer ${newToken}` };
+        return request(endpoint, { ...options, headers: retryHeaders, _isRetry: true });
+      }).catch(err => {
+        throw err;
       });
     }
 
@@ -87,10 +101,11 @@ async function request(endpoint, options = {}) {
     try {
       const newToken = await refreshAccessToken();
       processQueue(null, newToken);
-      headers['Authorization'] = `Bearer ${newToken}`;
-      response = await fetch(url, { ...config, headers });
+      const retryHeaders = { ...headers, 'Authorization': `Bearer ${newToken}` };
+      return request(endpoint, { ...options, headers: retryHeaders, _isRetry: true });
     } catch (err) {
       processQueue(err, null);
+      clearTokens();
       throw err;
     } finally {
       isRefreshing = false;
@@ -104,9 +119,22 @@ async function request(endpoint, options = {}) {
     } catch {
       errorData = { message: response.statusText };
     }
-    const error = new Error(
-      errorData.detail || errorData.message || errorData.error || 'Request failed'
-    );
+
+    // ✨ Handling backend's custom error structure: { success, message, errors, status_code }
+    let errorMessage = errorData.detail || errorData.message || errorData.error || 'Request failed';
+
+    if (errorData.errors) {
+      // If 'errors' is an object (e.g., { email: ["..."] }), extract the first one
+      if (typeof errorData.errors === 'object' && !Array.isArray(errorData.errors)) {
+        const firstField = Object.keys(errorData.errors)[0];
+        const firstError = errorData.errors[firstField];
+        errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+      } else if (Array.isArray(errorData.errors)) {
+        errorMessage = errorData.errors[0];
+      }
+    }
+
+    const error = new Error(errorMessage);
     error.status = response.status;
     error.data = errorData;
     throw error;
@@ -125,12 +153,23 @@ export const adaptProduct = (product) => {
   if (!product) return null;
 
   // Extract unique sizes and colors from variants
-  const variants = product.variants || [];
+  const variants = (product.variants || []).map(v => ({
+    ...v,
+    size: v.size?.trim(),
+    color: v.color?.trim()
+  }));
+
   const sizes = [...new Set(variants.filter((v) => v.size).map((v) => v.size))];
   const colors = [...new Set(variants.filter((v) => v.color).map((v) => v.color))];
   const colorMap = {};
   variants.forEach((v) => {
-    if (v.color && v.color_hex) colorMap[v.color] = v.color_hex;
+    if (v.color && v.color_hex) {
+      let hex = v.color_hex.trim();
+      if (!hex.startsWith('#')) hex = '#' + hex;
+      // Handle potential 5-digit hex (e.g. #00000) by making it 6-digit
+      if (hex.length === 6) hex = hex + '0';
+      colorMap[v.color] = hex;
+    }
   });
 
   // Build inventory array
@@ -143,7 +182,7 @@ export const adaptProduct = (product) => {
       count: v.stock_quantity || 0,
       stock: v.stock_quantity || 0,
       inStock: v.is_in_stock,
-      price: v.effective_price || v.price,
+      price: parseFloat(v.effective_price || v.price || 0),
       sku: v.sku,
     }))
     : [{ size: null, color: null, count: product.stock_quantity || 0, stock: product.stock_quantity || 0, inStock: product.is_in_stock }];
@@ -551,13 +590,28 @@ export const ordersAPI = {
   },
 
   createOrder: async (orderData) => {
+    const payload = {
+      coupon_code: orderData.couponCode,
+      customer_note: orderData.notes,
+      payment_method: orderData.paymentMethod === "Cash on Delivery" ? "cod" : "online",
+    };
+
+    if (orderData.addressId) {
+      payload.address_id = orderData.addressId;
+    } else if (orderData.customer) {
+      const c = orderData.customer;
+      payload.shipping_name = `${c.firstName} ${c.lastName}`;
+      payload.shipping_phone = c.phone;
+      payload.shipping_address_line1 = c.address;
+      payload.shipping_address_line2 = c.apartment || "";
+      payload.shipping_city = c.city;
+      payload.shipping_state = c.governorate || "";
+      payload.shipping_postal_code = c.postalCode || "";
+    }
+
     const data = await request('/orders/create/', {
       method: 'POST',
-      body: JSON.stringify({
-        address_id: orderData.addressId,
-        coupon_code: orderData.couponCode,
-        notes: orderData.notes,
-      }),
+      body: JSON.stringify(payload),
     });
     return adaptOrder(data.order || data);
   },
@@ -640,10 +694,10 @@ export const notificationsAPI = {
 // ─── Contact API ──────────────────────────────────────────────────────────────
 
 export const contactAPI = {
-  sendMessage: async ({ name, email, subject, message }) => {
+  submit: async ({ name, email, phone, subject, message }) => {
     return request('/contact/', {
       method: 'POST',
-      body: JSON.stringify({ name, email, subject, message }),
+      body: JSON.stringify({ name, email, phone, subject, message }),
     });
   },
 };

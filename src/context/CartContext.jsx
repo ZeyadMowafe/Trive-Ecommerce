@@ -29,10 +29,11 @@ const saveLocalCart = (items) => {
 
 export function CartProvider({ children }) {
   const { isAuthenticated } = useAuth();
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(() => loadLocalCart()); // ✨ Initialize from local storage
   const [loading, setLoading] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false); // Added
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [synced, setSynced] = useState(false);
+  const isFirstRender = useRef(true); // ✨ Track initial load
   const prevAuthState = useRef(isAuthenticated);
 
   const loadCart = useCallback(async () => {
@@ -90,6 +91,11 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     if (!isAuthenticated) {
+      // Don't save on the very first render to avoid overwriting with potentially empty local state
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
       saveLocalCart(items);
     }
   }, [items, isAuthenticated]);
@@ -116,8 +122,11 @@ export function CartProvider({ children }) {
           });
           setItems(cart.items);
           toast.success("تم إضافة المنتج إلى السلة بنجاح 🛒");
-        } catch {
+          return cart.items;
+        } catch (err) {
+          console.error("Cart error:", err);
           toast.error("حدث خطأ أثناء إضافة المنتج");
+          return null;
         } finally {
           setLoading(false);
         }
@@ -154,23 +163,22 @@ export function CartProvider({ children }) {
           }
 
           toast.success("تم إضافة المنتج إلى السلة بنجاح 🛒");
-          return [
-            ...prev,
-            {
-              cartId: `${id}-${variantId || "default"}-${Date.now()}`,
-              id,
-              variantId,
-              quantity,
-              name,
-              image,
-              images: [image],
-              price,
-              size,
-              color,
-              stockAvailable,
-              lineTotal: price * quantity,
-            },
-          ];
+          const newItem = {
+            cartId: `${id}-${variantId || "default"}-${Date.now()}`,
+            id,
+            variantId,
+            quantity,
+            name,
+            image,
+            images: [image],
+            price,
+            size,
+            color,
+            stockAvailable,
+            lineTotal: price * quantity,
+          };
+          const newItems = [...prev, newItem];
+          return newItems;
         });
       }
     },

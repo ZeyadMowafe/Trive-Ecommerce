@@ -1,10 +1,25 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { categoriesAPI } from "../../services/api";
 import "./Footer.css";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await categoriesAPI.getCategories();
+        // Take first 4-5 categories for the footer
+        setCategories(data.slice(0, 5));
+      } catch (error) {
+        console.error("Error fetching categories for footer:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
@@ -43,17 +58,13 @@ const Footer = () => {
           <div className="footer-section">
             <h4>Shop</h4>
             <ul>
+              {categories.map((category) => (
+                <li key={category.id}>
+                  <Link to={`/shop/${category.slug}`}>{category.name}</Link>
+                </li>
+              ))}
               <li>
-                <Link to="/shop/women">Women</Link>
-              </li>
-              <li>
-                <Link to="/shop/men">Men</Link>
-              </li>
-              <li>
-                <Link to="/shop/accessories">Accessories</Link>
-              </li>
-              <li>
-                <Link to="/shop/new">New Arrivals</Link>
+                <Link to="/#new-arrivals">New Arrivals</Link>
               </li>
             </ul>
           </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "../components/ProductCard/ProductCard";
 import { productsAPI } from "../services/api";
 import { useCart } from "../context/CartContext";
@@ -11,11 +11,12 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [similarProducts, setSimilarProducts] = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [direction, setDirection] = useState(0); // ✨ New state for animation direction
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
-  const { addToCart, getCartQuantity } = useCart(); // ✨ إضافة getCartQuantity
+  const { addToCart, getCartQuantity, openCart, refreshCart } = useCart(); // ✨ إضافة refreshCart
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -97,12 +98,24 @@ const ProductDetails = () => {
   };
 
   // Get stock for current selection
-  const getCurrentStock = () => {
-    if (!product || !selectedSize || !selectedColor) return 0;
-    const item = product.inventory.find(
+  const getCurrentVariant = () => {
+    if (!product || !selectedSize || !selectedColor) return null;
+    return product.inventory.find(
       (i) => i.size === selectedSize && i.color === selectedColor,
     );
-    return item ? item.count : 0;
+  };
+
+  const getCurrentStock = () => {
+    if (!product) return 0;
+    if (product.sizes.length === 0 && product.colors.length === 0) return product.count || 0;
+    const variant = getCurrentVariant();
+    return variant ? variant.count : 0;
+  };
+
+  const getCurrentPrice = () => {
+    if (!product) return 0;
+    const variant = getCurrentVariant();
+    return variant ? variant.price : product.price;
   };
 
   // Handle size selection
@@ -137,28 +150,40 @@ const ProductDetails = () => {
     setQuantity(1);
   };
 
-  const handleAddToCart = () => {
-    if (product && selectedSize && selectedColor && availableToAdd > 0) {
-      const variant = product.inventory.find(
-        (v) => v.size === selectedSize && v.color === selectedColor,
-      );
-      addToCart({
+  const handleAddToCart = async () => {
+    if (!product || availableToAdd <= 0) return;
+
+    const variant = getCurrentVariant();
+
+    // If product has variants but none selected (shouldn't happen with auto-select), don't add
+    if ((product.sizes.length > 0 || product.colors.length > 0) && !variant && (selectedSize || selectedColor)) {
+      // Allow adding if only one option exists and it's selected
+      if (product.sizes.length > 0 && !selectedSize) return;
+      if (product.colors.length > 0 && !selectedColor) return;
+    }
+
+    try {
+      await addToCart({
         id: product.id,
-        variantId: variant?.variantId,
+        variantId: variant?.variantId || null,
         quantity: quantity,
         name: product.name,
         image: product.image,
-        price: product.price,
+        price: variationPrice,
         size: selectedSize,
         color: selectedColor,
         stockAvailable: currentStock,
       });
+      // ✨ Force refresh to ensure UI sees the new items immediately
+      await refreshCart();
+    } catch (error) {
+      console.error("Add to cart failed:", error);
     }
   };
 
-  const handleBuyNow = () => {
-    handleAddToCart();
-    // Navigate to checkout would happen here
+  const handleBuyNow = async () => {
+    await handleAddToCart();
+    openCart(); // ✨ فتح الكارت تلقائياً
   };
 
   if (loading || !product) {
@@ -169,7 +194,25 @@ const ProductDetails = () => {
     );
   }
 
+  const handleImageSelect = (index) => {
+    setDirection(index > selectedImage ? 1 : -1);
+    setSelectedImage(index);
+  };
+
+  const nextImage = (e) => {
+    e.stopPropagation();
+    setDirection(1);
+    setSelectedImage((prev) => (prev + 1) % product.images.length);
+  };
+
+  const prevImage = (e) => {
+    e.stopPropagation();
+    setDirection(-1);
+    setSelectedImage((prev) => (prev - 1 + product.images.length) % product.images.length);
+  };
+
   const currentStock = getCurrentStock();
+  const variationPrice = getCurrentPrice();
   // ✨ حساب الكمية الموجودة في الكارت والمتاح للإضافة
   const cartQuantity = getCartQuantity(product.id, selectedSize, selectedColor);
   const availableToAdd = currentStock - cartQuantity;
@@ -178,6 +221,23 @@ const ProductDetails = () => {
   const availableColors = getAvailableColors();
   const availableColorsForSize = getAvailableColorsForSize(selectedSize);
   const availableSizesForColor = getAvailableSizesForColor(selectedColor);
+
+  const slideVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? "100%" : "-100%",
+      opacity: 0,
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      zIndex: 0,
+      x: direction < 0 ? "100%" : "-100%",
+      opacity: 0,
+    }),
+  };
 
   return (
     <div className="product-details-page">
@@ -196,23 +256,53 @@ const ProductDetails = () => {
           {/* Left: Images */}
           <div className="product-images-section">
             <div className="product-main-image">
-              <motion.img
-                key={selectedImage}
-                src={product.images[selectedImage]}
-                alt={product.name}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              />
+              <AnimatePresence initial={false} custom={direction}>
+                <motion.img
+                  key={selectedImage}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  src={product.images[selectedImage]}
+                  alt={product.name}
+                  transition={{
+                    x: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 },
+                  }}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={1}
+                  onDragEnd={(e, { offset, velocity }) => {
+                    const swipe = Math.abs(offset.x) > 50 || Math.abs(velocity.x) > 500;
+                    if (swipe && offset.x > 0) {
+                      prevImage(e);
+                    } else if (swipe && offset.x < 0) {
+                      nextImage(e);
+                    }
+                  }}
+                />
+              </AnimatePresence>
+
+              {product.images.length > 1 && (
+                <>
+                  <button className="nav-btn prev" onClick={prevImage} aria-label="Previous image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  </button>
+                  <button className="nav-btn next" onClick={nextImage} aria-label="Next image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                </>
+              )}
             </div>
             <div className="product-thumbnails">
               {product.images.map((image, index) => (
                 <button
                   key={index}
-                  className={`thumbnail ${selectedImage === index ? "active" : ""}`}
-                  onClick={() => setSelectedImage(index)}
+                  className={`thumbnail ${selectedImage === index ? "active" : ""} `}
+                  onClick={() => handleImageSelect(index)}
                 >
-                  <img src={image} alt={`${product.name} ${index + 1}`} />
+                  <img src={image} alt={`${product.name} ${index + 1} `} />
                 </button>
               ))}
             </div>
@@ -221,7 +311,7 @@ const ProductDetails = () => {
           {/* Right: Details */}
           <div className="product-info-section">
             <h1 className="product-title">{product.name}</h1>
-            <p className="product-price">${product.price}</p>
+            <p className="product-price">{variationPrice} EGP</p>
             <p className="product-description">{product.description}</p>
 
             {/* Size Selection */}
@@ -229,7 +319,7 @@ const ProductDetails = () => {
               <label>Size</label>
               <div className="size-options">
                 {product.sizes.map((size) => {
-                  const isSizeAvailable = availableSizesForColor.includes(size);
+                  const isSizeAvailable = availableSizes.includes(size);
                   return (
                     <button
                       key={size}
@@ -252,8 +342,7 @@ const ProductDetails = () => {
               <label>Color: {selectedColor}</label>
               <div className="color-options">
                 {product.colors.map((color) => {
-                  const isColorAvailable =
-                    availableColorsForSize.includes(color);
+                  const isColorAvailable = availableColors.includes(color);
                   return (
                     <button
                       key={color}
@@ -264,52 +353,12 @@ const ProductDetails = () => {
                       disabled={!isColorAvailable}
                       title={color}
                       style={{
-                        backgroundColor:
-                          color.toLowerCase() === "black"
-                            ? "#000"
-                            : color.toLowerCase() === "white"
-                              ? "#fff"
-                              : color.toLowerCase() === "navy"
-                                ? "#001f3f"
-                                : color.toLowerCase() === "camel"
-                                  ? "#c19a6b"
-                                  : color.toLowerCase() === "cream"
-                                    ? "#fffdd0"
-                                    : color.toLowerCase() === "charcoal"
-                                      ? "#36454f"
-                                      : color.toLowerCase() === "champagne"
-                                        ? "#f7e7ce"
-                                        : color.toLowerCase() === "emerald"
-                                          ? "#50c878"
-                                          : color.toLowerCase() === "tan"
-                                            ? "#d2b48c"
-                                            : color.toLowerCase() === "ivory"
-                                              ? "#fffff0"
-                                              : color.toLowerCase() ===
-                                                "dusty rose"
-                                                ? "#dcae96"
-                                                : color.toLowerCase() ===
-                                                  "beige"
-                                                  ? "#f5f5dc"
-                                                  : color.toLowerCase() ===
-                                                    "burgundy"
-                                                    ? "#800020"
-                                                    : color.toLowerCase() ===
-                                                      "cognac"
-                                                      ? "#9a463d"
-                                                      : color.toLowerCase() ===
-                                                        "sand"
-                                                        ? "#c2b280"
-                                                        : color.toLowerCase() ===
-                                                          "sky blue"
-                                                          ? "#87ceeb"
-                                                          : color.toLowerCase() ===
-                                                            "khaki"
-                                                            ? "#f0e68c"
-                                                            : "#ccc",
+                        backgroundColor: product.colorMap?.[color] || color.toLowerCase(),
                         border:
-                          color.toLowerCase() === "white" ||
-                            color.toLowerCase() === "cream"
+                          (product.colorMap?.[color]?.toLowerCase() === "#ffffff" ||
+                            color.toLowerCase() === "white" ||
+                            color.toLowerCase() === "cream" ||
+                            color.toLowerCase() === "ivory")
                             ? "2px solid #ddd"
                             : "none",
                       }}
@@ -381,7 +430,7 @@ const ProductDetails = () => {
             <div className="product-meta">
               <div className="meta-item">
                 <span className="meta-label">Category:</span>
-                <Link to={`/shop/${product.category}`}>{product.category}</Link>
+                <Link to={`/ shop / ${product.category} `}>{product.category}</Link>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Availability:</span>

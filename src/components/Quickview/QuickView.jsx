@@ -8,7 +8,7 @@ const QuickView = ({ product, isOpen, onClose }) => {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const { addToCart, getCartQuantity } = useCart();
+  const { addToCart, getCartQuantity, refreshCart, openCart } = useCart();
 
   useEffect(() => {
     if (product && isOpen) {
@@ -47,6 +47,14 @@ const QuickView = ({ product, isOpen, onClose }) => {
     return [...new Set(sizesWithStock)];
   };
 
+  // Get available colors (any color that has at least one size in stock)
+  const getAvailableColors = () => {
+    const colorsWithStock = product.inventory
+      .filter((item) => item.count > 0)
+      .map((item) => item.color);
+    return [...new Set(colorsWithStock)];
+  };
+
   // Get available colors for selected size
   const getAvailableColorsForSize = (size) => {
     return product.inventory
@@ -61,13 +69,22 @@ const QuickView = ({ product, isOpen, onClose }) => {
       .map((item) => item.size);
   };
 
-  // Get stock for current selection
-  const getCurrentStock = () => {
-    if (!selectedSize || !selectedColor) return 0;
-    const item = product.inventory.find(
+  const getCurrentVariant = () => {
+    if (!selectedSize || !selectedColor) return null;
+    return product.inventory.find(
       (i) => i.size === selectedSize && i.color === selectedColor,
     );
-    return item ? item.count : 0;
+  };
+
+  // Get stock for current selection
+  const getCurrentStock = () => {
+    const variant = getCurrentVariant();
+    return variant ? variant.count : 0;
+  };
+
+  const getCurrentPrice = () => {
+    const variant = getCurrentVariant();
+    return variant ? variant.price : product.price;
   };
 
   const handleSizeSelect = (size) => {
@@ -90,23 +107,26 @@ const QuickView = ({ product, isOpen, onClose }) => {
     setQuantity(1);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (selectedSize && selectedColor && availableToAdd > 0) {
-      const variant = product.inventory.find(
-        (v) => v.size === selectedSize && v.color === selectedColor,
-      );
-      addToCart({
+      const variant = getCurrentVariant();
+      await addToCart({
         id: product.id,
         variantId: variant?.variantId,
         quantity: quantity,
         name: product.name,
         image: product.image,
-        price: product.price,
+        price: variationPrice,
         size: selectedSize,
         color: selectedColor,
         stockAvailable: currentStock,
       });
-      // Show success feedback
+
+      // ✨ Force refresh and open cart for immediate feedback
+      await refreshCart();
+      openCart();
+
+      // Show success feedback and close
       setTimeout(() => {
         onClose();
       }, 800);
@@ -114,6 +134,7 @@ const QuickView = ({ product, isOpen, onClose }) => {
   };
 
   const currentStock = getCurrentStock();
+  const variationPrice = getCurrentPrice();
   const cartQuantity = getCartQuantity(product.id, selectedSize, selectedColor);
   const availableToAdd = currentStock - cartQuantity;
   const availableColorsForSize = getAvailableColorsForSize(selectedSize);
@@ -128,19 +149,9 @@ const QuickView = ({ product, isOpen, onClose }) => {
     hidden: { x: "100%" },
     visible: {
       x: 0,
-      transition: {
-        type: "spring",
-        damping: 30,
-        stiffness: 300,
-      },
     },
     exit: {
       x: "100%",
-      transition: {
-        type: "spring",
-        damping: 30,
-        stiffness: 300,
-      },
     },
   };
 
@@ -165,10 +176,11 @@ const QuickView = ({ product, isOpen, onClose }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
           >
             {/* Header */}
             <div className="quick-view-header">
-              <h2>Quick View</h2>
+              <h2>Choose Options</h2>
               <button
                 className="close-btn"
                 onClick={onClose}
@@ -223,7 +235,7 @@ const QuickView = ({ product, isOpen, onClose }) => {
               <div className="quick-view-info">
                 <div className="product-header">
                   <h1>{product.name}</h1>
-                  <p className="price">${product.price}</p>
+                  <p className="price">{variationPrice} EGP</p>
                   {product.subcategory && (
                     <p className="category">{product.subcategory}</p>
                   )}
@@ -239,7 +251,7 @@ const QuickView = ({ product, isOpen, onClose }) => {
                   <div className="size-options">
                     {product.sizes.map((size) => {
                       const isSizeAvailable =
-                        availableSizesForColor.includes(size);
+                        getAvailableSizes().includes(size);
                       return (
                         <button
                           key={size}
@@ -262,7 +274,7 @@ const QuickView = ({ product, isOpen, onClose }) => {
                   <div className="color-options">
                     {product.colors.map((color) => {
                       const isColorAvailable =
-                        availableColorsForSize.includes(color);
+                        getAvailableColors().includes(color);
                       return (
                         <button
                           key={color}
@@ -274,53 +286,12 @@ const QuickView = ({ product, isOpen, onClose }) => {
                           title={color}
                           style={{
                             backgroundColor:
-                              color.toLowerCase() === "black"
-                                ? "#000"
-                                : color.toLowerCase() === "white"
-                                  ? "#fff"
-                                  : color.toLowerCase() === "navy"
-                                    ? "#001f3f"
-                                    : color.toLowerCase() === "camel"
-                                      ? "#c19a6b"
-                                      : color.toLowerCase() === "cream"
-                                        ? "#fffdd0"
-                                        : color.toLowerCase() === "charcoal"
-                                          ? "#36454f"
-                                          : color.toLowerCase() === "champagne"
-                                            ? "#f7e7ce"
-                                            : color.toLowerCase() === "emerald"
-                                              ? "#50c878"
-                                              : color.toLowerCase() === "tan"
-                                                ? "#d2b48c"
-                                                : color.toLowerCase() ===
-                                                  "ivory"
-                                                  ? "#fffff0"
-                                                  : color.toLowerCase() ===
-                                                    "dusty rose"
-                                                    ? "#dcae96"
-                                                    : color.toLowerCase() ===
-                                                      "beige"
-                                                      ? "#f5f5dc"
-                                                      : color.toLowerCase() ===
-                                                        "burgundy"
-                                                        ? "#800020"
-                                                        : color.toLowerCase() ===
-                                                          "cognac"
-                                                          ? "#9a463d"
-                                                          : color.toLowerCase() ===
-                                                            "sand"
-                                                            ? "#c2b280"
-                                                            : color.toLowerCase() ===
-                                                              "sky blue"
-                                                              ? "#87ceeb"
-                                                              : color.toLowerCase() ===
-                                                                "khaki"
-                                                                ? "#f0e68c"
-                                                                : "#ccc",
+                              product.colorMap?.[color] || color.toLowerCase(),
                             border:
-                              color.toLowerCase() === "white" ||
+                              (product.colorMap?.[color]?.toLowerCase() === "#ffffff" ||
+                                color.toLowerCase() === "white" ||
                                 color.toLowerCase() === "cream" ||
-                                color.toLowerCase() === "ivory"
+                                color.toLowerCase() === "ivory")
                                 ? "2px solid #ddd"
                                 : "none",
                           }}

@@ -14,6 +14,7 @@
 .breadcrumb a {
   color: var(--text-secondary);
   transition: var(--transition-fast);
+  text-decoration: none;
 }
 
 .breadcrumb a:hover {
@@ -39,16 +40,66 @@
 }
 
 .product-main-image {
-  width: 100%;
   aspect-ratio: 3/4;
+  background-color: #f7f7f7;
+  border-radius: 12px;
   overflow: hidden;
-  background-color: var(--bg-light);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-main-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  position: absolute;
+}
+
+/* Nav Buttons */
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #333;
+  opacity: 0;
+}
+
+.product-main-image:hover .nav-btn {
+  opacity: 1;
+}
+
+.nav-btn:hover {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.nav-btn.prev {
+  left: 1rem;
+}
+
+.nav-btn.next {
+  right: 1rem;
+}
+
+.nav-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .product-thumbnails {
@@ -126,14 +177,15 @@
 }
 
 .size-btn {
-  min-width: 60px;
-  padding: 0.75rem 1.25rem;
+  min-width: 80px;
+  padding: 1rem 1.5rem;
   border: 1px solid var(--border-color);
   background-color: white;
   font-family: var(--font-body);
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition-smooth);
+  font-size: 1rem;
 }
 
 .size-btn:hover,
@@ -150,8 +202,8 @@
 }
 
 .color-btn {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   cursor: pointer;
   border: 3px solid transparent;
@@ -267,15 +319,15 @@
   .product-title {
     font-size: 2rem;
   }
-  
+
   .product-price {
     font-size: 1.5rem;
   }
-  
+
   .product-actions {
     grid-template-columns: 1fr;
   }
-  
+
   .similar-products-section h2 {
     font-size: 2rem;
   }

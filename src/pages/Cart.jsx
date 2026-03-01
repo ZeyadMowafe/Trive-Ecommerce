@@ -47,7 +47,7 @@ const Cart = () => {
                 <div className="cart-item-details">
                   <h3>{item.name}</h3>
                   <p className="item-meta">Size: {item.size} | Color: {item.color}</p>
-                  <p className="item-price-mobile">${item.price}</p>
+                  <p className="item-price-mobile">{item.price} EGP</p>
                 </div>
 
                 <div className="cart-item-quantity">
@@ -57,7 +57,7 @@ const Cart = () => {
                 </div>
 
                 <div className="cart-item-price">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  {(item.price * item.quantity).toFixed(2)} EGP
                 </div>
 
                 <button
@@ -77,8 +77,7 @@ const Cart = () => {
           <div className="cart-summary">
             <h3>Order Summary</h3>
             <div className="summary-row">
-              <span>Subtotal</span>
-              <span>${getCartTotal().toFixed(2)}</span>
+              <span>{getCartTotal().toFixed(2)} EGP</span>
             </div>
             <div className="summary-row">
               <span>Shipping</span>
@@ -86,7 +85,7 @@ const Cart = () => {
             </div>
             <div className="summary-total">
               <span>Total</span>
-              <span>${getCartTotal().toFixed(2)}</span>
+              <span>{getCartTotal().toFixed(2)} EGP</span>
             </div>
             <Link to="/checkout" className="btn-primary w-100">
               Proceed to Checkout
