@@ -100,7 +100,7 @@ const Filters = ({ filters, onFilterChange }) => {
             <div className="price-display-top">
               <span className="price-label">Selected Range</span>
               <span className="price-value">
-                ${filters.minPrice} — ${filters.maxPrice}
+                {filters.minPrice} — {filters.maxPrice} EGP
               </span>
             </div>
 
@@ -132,7 +132,7 @@ const Filters = ({ filters, onFilterChange }) => {
               <div className="price-input-group">
                 <label>Minimum</label>
                 <div className="price-input-wrapper">
-                  <span className="currency-symbol">$</span>
+                  <span className="currency-symbol">EGP</span>
                   <input
                     type="number"
                     min="0"
@@ -150,7 +150,7 @@ const Filters = ({ filters, onFilterChange }) => {
               <div className="price-input-group">
                 <label>Maximum</label>
                 <div className="price-input-wrapper">
-                  <span className="currency-symbol">$</span>
+                  <span className="currency-symbol">EGP</span>
                   <input
                     type="number"
                     min={filters.minPrice}

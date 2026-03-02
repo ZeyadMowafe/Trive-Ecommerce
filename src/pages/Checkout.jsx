@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { ordersAPI } from "../services/api";
+import { ordersAPI, couponsAPI } from "../services/api";
 import "./Checkout.css";
 import { toast } from "react-toastify";
 
@@ -20,6 +20,8 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [discountCode, setDiscountCode] = useState("");
   const [discountAmount, setDiscountAmount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const [form, setForm] = useState({
     email: "",
@@ -108,22 +110,22 @@ const Checkout = () => {
     return null;
   }
 
-  const applyDiscount = () => {
-    const code = discountCode.trim().toUpperCase();
-    let discount = 0;
-
-    // Example codes
-    const validCodes = {
-      TRIVE: 10,
-    };
-
-    if (validCodes[code]) {
-      discount = validCodes[code];
-      setDiscountAmount(discount);
-      toast.success(`تم تطبيق الخصم: ${discount} ج.م`); // هنا ممكن تعمل toast بدل alert
-    } else {
+  const applyDiscount = async () => {
+    if (!discountCode.trim()) return;
+    setCouponLoading(true);
+    try {
+      const data = await couponsAPI.validateCoupon(discountCode.trim(), subtotal);
+      const amount = parseFloat(data.discount_amount || data.discount || 0);
+      setDiscountAmount(amount);
+      setAppliedCoupon(data);
+      toast.success(`✅ تم تطبيق الخصم: ${amount.toFixed(2)} EGP`);
+    } catch (err) {
       setDiscountAmount(0);
-      toast.error("الكود غير صحيح");
+      setAppliedCoupon(null);
+      const msg = err?.data?.message || err?.message || "الكود غير صحيح";
+      toast.error(msg);
+    } finally {
+      setCouponLoading(false);
     }
   };
 
@@ -418,10 +420,10 @@ const Checkout = () => {
                 />
                 <button
                   type="button"
-                  disabled={!discountCode.trim()}
+                  disabled={!discountCode.trim() || couponLoading}
                   onClick={applyDiscount}
                 >
-                  Apply
+                  {couponLoading ? "..." : "Apply"}
                 </button>
               </div>
               <div className="summary-totals">
@@ -481,10 +483,10 @@ const Checkout = () => {
               />
               <button
                 type="button"
-                disabled={!discountCode.trim()}
+                disabled={!discountCode.trim() || couponLoading}
                 onClick={applyDiscount}
               >
-                Apply
+                {couponLoading ? "..." : "Apply"}
               </button>
             </div>
 

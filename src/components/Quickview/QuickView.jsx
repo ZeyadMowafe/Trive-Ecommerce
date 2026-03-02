@@ -12,7 +12,6 @@ const QuickView = ({ product, isOpen, onClose }) => {
 
   useEffect(() => {
     if (product && isOpen) {
-      // Set first available size and color when product changes
       const firstAvailableSize = getAvailableSizes()[0] || product.sizes[0];
       setSelectedSize(firstAvailableSize);
 
@@ -25,13 +24,11 @@ const QuickView = ({ product, isOpen, onClose }) => {
   }, [product, isOpen]);
 
   useEffect(() => {
-    // Lock body scroll when drawer is open
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
-
     return () => {
       document.body.style.overflow = "";
     };
@@ -39,7 +36,7 @@ const QuickView = ({ product, isOpen, onClose }) => {
 
   if (!product) return null;
 
-  // Get available sizes (any size that has at least one color in stock)
+  // ─── Inventory Helpers ───────────────────────────────────────────────
   const getAvailableSizes = () => {
     const sizesWithStock = product.inventory
       .filter((item) => item.count > 0)
@@ -47,7 +44,6 @@ const QuickView = ({ product, isOpen, onClose }) => {
     return [...new Set(sizesWithStock)];
   };
 
-  // Get available colors (any color that has at least one size in stock)
   const getAvailableColors = () => {
     const colorsWithStock = product.inventory
       .filter((item) => item.count > 0)
@@ -55,14 +51,12 @@ const QuickView = ({ product, isOpen, onClose }) => {
     return [...new Set(colorsWithStock)];
   };
 
-  // Get available colors for selected size
   const getAvailableColorsForSize = (size) => {
     return product.inventory
       .filter((item) => item.size === size && item.count > 0)
       .map((item) => item.color);
   };
 
-  // Get available sizes for selected color
   const getAvailableSizesForColor = (color) => {
     return product.inventory
       .filter((item) => item.color === color && item.count > 0)
@@ -76,7 +70,6 @@ const QuickView = ({ product, isOpen, onClose }) => {
     );
   };
 
-  // Get stock for current selection
   const getCurrentStock = () => {
     const variant = getCurrentVariant();
     return variant ? variant.count : 0;
@@ -87,10 +80,10 @@ const QuickView = ({ product, isOpen, onClose }) => {
     return variant ? variant.price : product.price;
   };
 
+  // ─── Handlers ────────────────────────────────────────────────────────
   const handleSizeSelect = (size) => {
     setSelectedSize(size);
     const availableColorsForSize = getAvailableColorsForSize(size);
-
     if (!availableColorsForSize.includes(selectedColor)) {
       setSelectedColor(availableColorsForSize[0] || product.colors[0]);
     }
@@ -100,7 +93,6 @@ const QuickView = ({ product, isOpen, onClose }) => {
   const handleColorSelect = (color) => {
     setSelectedColor(color);
     const availableSizesForColor = getAvailableSizesForColor(color);
-
     if (!availableSizesForColor.includes(selectedSize)) {
       setSelectedSize(availableSizesForColor[0] || product.sizes[0]);
     }
@@ -112,7 +104,7 @@ const QuickView = ({ product, isOpen, onClose }) => {
       const variant = getCurrentVariant();
       await addToCart({
         id: product.id,
-        variantId: variant?.variantId,
+        variantId: variant?.variantId || null,
         quantity: quantity,
         name: product.name,
         image: product.image,
@@ -121,18 +113,17 @@ const QuickView = ({ product, isOpen, onClose }) => {
         color: selectedColor,
         stockAvailable: currentStock,
       });
-
-      // ✨ Force refresh and open cart for immediate feedback
       await refreshCart();
       openCart();
-
-      // Show success feedback and close
-      setTimeout(() => {
-        onClose();
-      }, 800);
+      setTimeout(() => onClose(), 800);
     }
   };
 
+  const handleBuyNow = async () => {
+    await handleAddToCart();
+  };
+
+  // ─── Derived state ───────────────────────────────────────────────────
   const currentStock = getCurrentStock();
   const variationPrice = getCurrentPrice();
   const cartQuantity = getCartQuantity(product.id, selectedSize, selectedColor);
@@ -140,6 +131,7 @@ const QuickView = ({ product, isOpen, onClose }) => {
   const availableColorsForSize = getAvailableColorsForSize(selectedSize);
   const availableSizesForColor = getAvailableSizesForColor(selectedColor);
 
+  // ─── Animation Variants ──────────────────────────────────────────────
   const overlayVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
@@ -149,12 +141,32 @@ const QuickView = ({ product, isOpen, onClose }) => {
     hidden: { x: "100%" },
     visible: {
       x: 0,
+      transition: { type: "spring", damping: 30, stiffness: 300 },
     },
     exit: {
       x: "100%",
+      transition: { type: "spring", damping: 30, stiffness: 300 },
     },
   };
 
+  // ─── Color resolver ──────────────────────────────────────────────────
+  const resolveColor = (color) => {
+    if (product.colorMap?.[color]) return product.colorMap[color];
+    const map = {
+      black: "#000", white: "#fff", navy: "#001f3f", camel: "#c19a6b",
+      cream: "#fffdd0", charcoal: "#36454f", champagne: "#f7e7ce",
+      emerald: "#50c878", tan: "#d2b48c", ivory: "#fffff0",
+      "dusty rose": "#dcae96", beige: "#f5f5dc", burgundy: "#800020",
+      cognac: "#9a463d", sand: "#c2b280", "sky blue": "#87ceeb", khaki: "#f0e68c",
+    };
+    return map[color.toLowerCase()] || "#ccc";
+  };
+
+  const isLightColor = (color) =>
+    ["white", "cream", "ivory", "champagne", "beige", "khaki"].includes(color.toLowerCase()) ||
+    product.colorMap?.[color]?.toLowerCase() === "#ffffff";
+
+  // ───────────────────────────────────────────────────────────────────────
   return (
     <AnimatePresence>
       {isOpen && (
@@ -176,35 +188,22 @@ const QuickView = ({ product, isOpen, onClose }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
           >
             {/* Header */}
             <div className="quick-view-header">
-              <h2>Choose Options</h2>
-              <button
-                className="close-btn"
-                onClick={onClose}
-                aria-label="Close"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+              <h2>Quick View</h2>
+              <button className="close-btn" onClick={onClose} aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </div>
 
             {/* Content */}
             <div className="quick-view-content">
-              {/* Images Section */}
+              {/* Images */}
               <div className="quick-view-images">
                 <motion.div
                   className="main-image"
@@ -245,114 +244,104 @@ const QuickView = ({ product, isOpen, onClose }) => {
                   <p className="description">{product.description}</p>
                 )}
 
-                {/* Size Selection */}
-                <div className="option-group">
-                  <label>Size</label>
-                  <div className="size-options">
-                    {product.sizes.map((size) => {
-                      const isSizeAvailable =
-                        getAvailableSizes().includes(size);
-                      return (
-                        <button
-                          key={size}
-                          className={`size-btn ${selectedSize === size ? "active" : ""} ${!isSizeAvailable ? "disabled" : ""}`}
-                          onClick={() =>
-                            isSizeAvailable && handleSizeSelect(size)
-                          }
-                          disabled={!isSizeAvailable}
-                        >
-                          {size}
-                        </button>
-                      );
-                    })}
+                {/* Size */}
+                {product.sizes.length > 0 && (
+                  <div className="option-group">
+                    <label>Size</label>
+                    <div className="size-options">
+                      {product.sizes.map((size) => {
+                        const isSizeAvailable = getAvailableSizes().includes(size);
+                        return (
+                          <button
+                            key={size}
+                            className={`size-btn ${selectedSize === size ? "active" : ""} ${!isSizeAvailable ? "sold-out" : ""}`}
+                            onClick={() => isSizeAvailable && handleSizeSelect(size)}
+                            disabled={!isSizeAvailable}
+                          >
+                            {size}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Color Selection */}
-                <div className="option-group">
-                  <label>Color: {selectedColor}</label>
-                  <div className="color-options">
-                    {product.colors.map((color) => {
-                      const isColorAvailable =
-                        getAvailableColors().includes(color);
-                      return (
-                        <button
-                          key={color}
-                          className={`color-btn ${selectedColor === color ? "active" : ""} ${!isColorAvailable ? "disabled" : ""}`}
-                          onClick={() =>
-                            isColorAvailable && handleColorSelect(color)
-                          }
-                          disabled={!isColorAvailable}
-                          title={color}
-                          style={{
-                            backgroundColor:
-                              product.colorMap?.[color] || color.toLowerCase(),
-                            border:
-                              (product.colorMap?.[color]?.toLowerCase() === "#ffffff" ||
-                                color.toLowerCase() === "white" ||
-                                color.toLowerCase() === "cream" ||
-                                color.toLowerCase() === "ivory")
-                                ? "2px solid #ddd"
-                                : "none",
-                          }}
-                        />
-                      );
-                    })}
+                {/* Color */}
+                {product.colors.length > 0 && (
+                  <div className="option-group">
+                    <label>Color: <span className="color-name">{selectedColor}</span></label>
+                    <div className="color-options">
+                      {product.colors.map((color) => {
+                        const isColorAvailable = getAvailableColors().includes(color);
+                        return (
+                          <button
+                            key={color}
+                            className={`color-btn ${selectedColor === color ? "active" : ""} ${!isColorAvailable ? "sold-out" : ""}`}
+                            onClick={() => isColorAvailable && handleColorSelect(color)}
+                            disabled={!isColorAvailable}
+                            title={color}
+                            style={{
+                              backgroundColor: resolveColor(color),
+                              border: isLightColor(color) ? "2px solid #ddd" : "none",
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Stock Info */}
+                {/* Stock info */}
                 {availableToAdd > 0 && availableToAdd <= 5 && (
                   <div className="stock-warning">
                     Only {availableToAdd} left in stock!
                     {cartQuantity > 0 && ` (${cartQuantity} already in cart)`}
                   </div>
                 )}
-
                 {availableToAdd === 0 && cartQuantity > 0 && (
                   <div className="stock-out">
-                    You have {cartQuantity} of this item in your cart (max
-                    available)
+                    You have {cartQuantity} of this item in your cart (max available)
                   </div>
                 )}
-
                 {availableToAdd === 0 && cartQuantity === 0 && (
-                  <div className="stock-out">
-                    This combination is currently out of stock
-                  </div>
+                  <div className="stock-out">This combination is currently out of stock</div>
                 )}
 
                 {/* Quantity */}
                 <div className="option-group">
                   <label>Quantity</label>
                   <div className="quantity-selector">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      disabled={quantity <= 1}
-                    >
-                      −
-                    </button>
+                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>−</button>
                     <span>{quantity}</span>
                     <button
-                      onClick={() =>
-                        setQuantity(Math.min(availableToAdd, quantity + 1))
-                      }
-                      disabled={quantity >= availableToAdd}
-                    >
-                      +
-                    </button>
+                      onClick={() => setQuantity(Math.min(availableToAdd, quantity + 1))}
+                      disabled={quantity >= availableToAdd || availableToAdd === 0}
+                    >+</button>
                   </div>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Actions */}
                 <div className="quick-view-actions">
-                  <button
-                    className="btn-add-to-cart"
-                    onClick={handleAddToCart}
-                    disabled={availableToAdd === 0}
-                  >
+                  <button className="btn-outline" onClick={handleAddToCart} disabled={availableToAdd === 0}>
                     {availableToAdd === 0 ? "Out of Stock" : "Add to Cart"}
                   </button>
+                  <button className="btn-primary" onClick={handleBuyNow} disabled={availableToAdd === 0}>
+                    {availableToAdd === 0 ? "Out of Stock" : "Buy It Now"}
+                  </button>
+                </div>
+
+                {/* Meta */}
+                <div className="product-meta">
+                  <div className="meta-item">
+                    <span className="meta-label">Category:</span>
+                    <span className="meta-value">{product.category}</span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="meta-label">Availability:</span>
+                    <span className={availableToAdd > 0 ? "in-stock" : "out-of-stock"}>
+                      {availableToAdd > 0 ? "In Stock" : "Out of Stock"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

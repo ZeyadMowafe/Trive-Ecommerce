@@ -91,7 +91,6 @@ const Profile = () => {
                                     <p>{new Date(user.dateJoined).toLocaleDateString()}</p>
                                 </div>
                             </div>
-                            <button className="btn-outline edit-profile-btn">Edit Profile</button>
                         </div>
                     </div>
                 </motion.div>

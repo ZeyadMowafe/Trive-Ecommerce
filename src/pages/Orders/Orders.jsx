@@ -97,7 +97,7 @@ const Orders = () => {
                                     </div>
                                     <div className="order-total-group">
                                         <span className="label">Total</span>
-                                        <span className="value">${parseFloat(order.totalAmount).toFixed(2)}</span>
+                                        <span className="value">{parseFloat(order.total || 0).toFixed(2)} EGP</span>
                                     </div>
                                 </div>
                                 <div className="order-items-preview">
@@ -110,10 +110,6 @@ const Orders = () => {
                                         {order.items?.length > 4 && (
                                             <div className="more-items">+{order.items.length - 4}</div>
                                         )}
-                                    </div>
-                                    <div className="order-actions">
-                                        <button className="btn-outline">Track Order</button>
-                                        <button className="btn-primary">Order Details</button>
                                     </div>
                                 </div>
                             </motion.div>

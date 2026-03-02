@@ -48,18 +48,11 @@ const Login = () => {
               <input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} required />
             </div>
 
-            <button type="submit" className="btn-primary w-100" disabled={loading}>
+            <button type="submit" className="btn-primary w-100" disabled={loading} style={{ marginTop: '1.5rem' }}>
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
-          <div className="social-login">
-            <p>Or sign in with</p>
-            <div className="social-buttons">
-              <button className="social-btn google">Google</button>
-              <button className="social-btn facebook">Facebook</button>
-            </div>
-          </div>
 
           <p className="auth-switch">Don't have an account? <Link to="/register">Create one</Link></p>
         </motion.div>
