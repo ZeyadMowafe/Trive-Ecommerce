@@ -70,18 +70,11 @@ const Register = () => {
               <input type="password" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} required />
             </div>
 
-            <button type="submit" className="btn-primary w-100" disabled={loading}>
+            <button type="submit" className="btn-primary w-100" disabled={loading} style={{ marginTop: '1.5rem' }}>
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 
-          <div className="social-login">
-            <p>Or sign up with</p>
-            <div className="social-buttons">
-              <button className="social-btn google">Google</button>
-              <button className="social-btn facebook">Facebook</button>
-            </div>
-          </div>
 
           <p className="auth-switch">Already have an account? <Link to="/login">Sign in</Link></p>
         </motion.div>
