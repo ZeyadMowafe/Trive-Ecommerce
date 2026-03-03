@@ -591,9 +591,11 @@ export const ordersAPI = {
 
   createOrder: async (orderData) => {
     const payload = {
-      coupon_code: orderData.couponCode,
-      customer_note: orderData.notes,
+      coupon_code: orderData.couponCode || '',
+      customer_note: orderData.notes || '',
       payment_method: orderData.paymentMethod === "Cash on Delivery" ? "cod" : "online",
+      shipping: orderData.shipping || 0,   // shipping cost for backend to store
+      items: orderData.items || [],        // cart items for guest checkout
     };
 
     if (orderData.addressId) {
@@ -607,6 +609,7 @@ export const ordersAPI = {
       payload.shipping_city = c.city;
       payload.shipping_state = c.governorate || "";
       payload.shipping_postal_code = c.postalCode || "";
+      payload.shipping_country = "Egypt";
     }
 
     const data = await request('/orders/create/', {
@@ -661,13 +664,36 @@ export const couponsAPI = {
       method: 'POST',
       body: JSON.stringify({ code, order_total: orderTotal }),
     });
+    // Backend returns: { success, message, discount_amount, coupon: { ... } }
     return {
-      valid: data.valid,
-      discount: data.discount_amount,
-      discountType: data.discount_type,
-      couponId: data.coupon_id,
-      code: data.code,
+      success: data.success,
+      message: data.message,
+      discount_amount: data.discount_amount,        // top-level for easy access
+      discount: data.discount_amount,               // alias
+      discountType: data.coupon?.discount_type,
+      discountValue: data.coupon?.discount_value,
+      couponId: data.coupon?.id,
+      code: data.coupon?.code,
     };
+  },
+
+  // Admin CRUD
+  list: async (params = {}) => {
+    const query = new URLSearchParams(params);
+    const data = await request(`/coupons/admin/?${query}`);
+    return { coupons: data.results || data, count: data.count || (data.results || data).length };
+  },
+
+  create: async (couponData) => {
+    return request('/coupons/admin/', { method: 'POST', body: JSON.stringify(couponData) });
+  },
+
+  update: async (id, couponData) => {
+    return request(`/coupons/admin/${id}/`, { method: 'PATCH', body: JSON.stringify(couponData) });
+  },
+
+  delete: async (id) => {
+    return request(`/coupons/admin/${id}/`, { method: 'DELETE' });
   },
 };
 

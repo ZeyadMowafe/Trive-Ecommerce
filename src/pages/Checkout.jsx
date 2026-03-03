@@ -115,6 +115,7 @@ const Checkout = () => {
     setCouponLoading(true);
     try {
       const data = await couponsAPI.validateCoupon(discountCode.trim(), subtotal);
+      // Backend returns: { success, message, discount_amount, coupon: {...} }
       const amount = parseFloat(data.discount_amount || data.discount || 0);
       setDiscountAmount(amount);
       setAppliedCoupon(data);
@@ -127,6 +128,13 @@ const Checkout = () => {
     } finally {
       setCouponLoading(false);
     }
+  };
+
+  const removeCoupon = () => {
+    setDiscountCode("");
+    setDiscountAmount(0);
+    setAppliedCoupon(null);
+    toast.info("تم إزالة الكوبون");
   };
 
   return (
@@ -412,19 +420,41 @@ const Checkout = () => {
                 </div>
               ))}
               <div className="discount-section">
-                <input
-                  type="text"
-                  placeholder="Discount code"
-                  value={discountCode}
-                  onChange={(e) => setDiscountCode(e.target.value)}
-                />
-                <button
-                  type="button"
-                  disabled={!discountCode.trim() || couponLoading}
-                  onClick={applyDiscount}
-                >
-                  {couponLoading ? "..." : "Apply"}
-                </button>
+                {appliedCoupon ? (
+                  <div className="coupon-applied-badge">
+                    <div className="coupon-info">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="tag-icon">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                      </svg>
+                      <span className="coupon-code">{appliedCoupon.code}</span>
+                      <span className="coupon-amount">−{discountAmount.toFixed(2)} EGP</span>
+                    </div>
+                    <button type="button" className="coupon-remove-btn" onClick={removeCoupon} aria-label="Remove coupon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Discount code"
+                      value={discountCode}
+                      onChange={(e) => setDiscountCode(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && applyDiscount()}
+                    />
+                    <button
+                      type="button"
+                      disabled={!discountCode.trim() || couponLoading}
+                      onClick={applyDiscount}
+                    >
+                      {couponLoading ? "..." : "Apply"}
+                    </button>
+                  </>
+                )}
               </div>
               <div className="summary-totals">
                 <div className="summary-row">
@@ -435,14 +465,16 @@ const Checkout = () => {
                   <span>Shipping</span>
                   <span>{shippingCost} EGP</span>
                 </div>
-                <div className="summary-row">
-                  <span>Discount</span>
-                  <span>-{discountAmount} EGP</span>
-                </div>
+                {discountAmount > 0 && (
+                  <div className="summary-row discount-row">
+                    <span>Discount</span>
+                    <span className="discount-value">−{discountAmount.toFixed(2)} EGP</span>
+                  </div>
+                )}
 
                 <div className="summary-total">
                   <span>Total</span>
-                  <span>{total} EGP</span>
+                  <span>{total.toFixed(2)} EGP</span>
                 </div>
               </div>
             </div>
@@ -475,19 +507,41 @@ const Checkout = () => {
               </div>
             ))}
             <div className="discount-section">
-              <input
-                type="text"
-                placeholder="Discount code"
-                value={discountCode}
-                onChange={(e) => setDiscountCode(e.target.value)}
-              />
-              <button
-                type="button"
-                disabled={!discountCode.trim() || couponLoading}
-                onClick={applyDiscount}
-              >
-                {couponLoading ? "..." : "Apply"}
-              </button>
+              {appliedCoupon ? (
+                <div className="coupon-applied-badge">
+                  <div className="coupon-info">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="tag-icon">
+                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                      <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                    </svg>
+                    <span className="coupon-code">{appliedCoupon.code}</span>
+                    <span className="coupon-amount">−{discountAmount.toFixed(2)} EGP</span>
+                  </div>
+                  <button type="button" className="coupon-remove-btn" onClick={removeCoupon} aria-label="Remove coupon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Discount code"
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && applyDiscount()}
+                  />
+                  <button
+                    type="button"
+                    disabled={!discountCode.trim() || couponLoading}
+                    onClick={applyDiscount}
+                  >
+                    {couponLoading ? "..." : "Apply"}
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="summary-totals">
@@ -499,10 +553,12 @@ const Checkout = () => {
                 <span>Shipping</span>
                 <span>{shippingCost} EGP</span>
               </div>
-              <div className="summary-row">
-                <span>Discount</span>
-                <span>-{discountAmount} EGP</span>
-              </div>
+              {discountAmount > 0 && (
+                <div className="summary-row discount-row">
+                  <span>Discount</span>
+                  <span className="discount-value">−{discountAmount.toFixed(2)} EGP</span>
+                </div>
+              )}
 
               <div className="summary-total">
                 <span>Total</span>
