@@ -238,20 +238,29 @@
   color: white;
 }
 
-.size-btn.sold-out {
+.size-btn.sold-out,
+.size-btn.unavailable,
+.color-btn.sold-out,
+.color-btn.unavailable {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.size-btn.sold-out,
+.color-btn.sold-out {
   opacity: 0.35;
-  cursor: not-allowed;
 }
 
 .size-btn.sold-out::after {
   content: '';
   position: absolute;
   top: 50%;
-  left: 8%;
-  right: 8%;
+  left: 0;
+  right: 0;
   height: 1.5px;
-  background-color: #999;
+  background-color: #000;
   transform: translateY(-50%) rotate(-15deg);
+  pointer-events: none;
 }
 
 /* ─── Color ──────────────────────────────────────────────── */
@@ -281,20 +290,18 @@
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--primary-dark);
 }
 
-.color-btn.sold-out {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.color-btn.sold-out::after {
+.color-btn.sold-out::after,
+.color-btn.unavailable::after {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   width: 2px;
-  height: 120%;
-  background-color: #999;
+  height: 110%;
+  background-color: #000;
   transform: translate(-50%, -50%) rotate(45deg);
+  pointer-events: none;
+  box-shadow: 0 0 2px white;
 }
 
 /* ─── Stock ──────────────────────────────────────────────── */

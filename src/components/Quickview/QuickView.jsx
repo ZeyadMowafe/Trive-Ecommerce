@@ -250,13 +250,16 @@ const QuickView = ({ product, isOpen, onClose }) => {
                     <label>Size</label>
                     <div className="size-options">
                       {product.sizes.map((size) => {
-                        const isSizeAvailable = getAvailableSizes().includes(size);
+                        const isSizeInStockAtAll = getAvailableSizes().includes(size);
+                        const isSizeAvailableForColor = availableSizesForColor.includes(size);
+                        const isSoldOut = !isSizeInStockAtAll;
+                        const isUnavailable = isSizeInStockAtAll && !isSizeAvailableForColor;
+
                         return (
                           <button
                             key={size}
-                            className={`size-btn ${selectedSize === size ? "active" : ""} ${!isSizeAvailable ? "sold-out" : ""}`}
-                            onClick={() => isSizeAvailable && handleSizeSelect(size)}
-                            disabled={!isSizeAvailable}
+                            className={`size-btn ${selectedSize === size ? "active" : ""} ${isSoldOut ? "sold-out" : ""} ${isUnavailable ? "unavailable" : ""}`}
+                            onClick={() => handleSizeSelect(size)}
                           >
                             {size}
                           </button>
@@ -272,13 +275,16 @@ const QuickView = ({ product, isOpen, onClose }) => {
                     <label>Color: <span className="color-name">{selectedColor}</span></label>
                     <div className="color-options">
                       {product.colors.map((color) => {
-                        const isColorAvailable = getAvailableColors().includes(color);
+                        const isColorInStockAtAll = getAvailableColors().includes(color);
+                        const isColorAvailableForSize = availableColorsForSize.includes(color);
+                        const isSoldOut = !isColorInStockAtAll;
+                        const isUnavailable = isColorInStockAtAll && !isColorAvailableForSize;
+
                         return (
                           <button
                             key={color}
-                            className={`color-btn ${selectedColor === color ? "active" : ""} ${!isColorAvailable ? "sold-out" : ""}`}
-                            onClick={() => isColorAvailable && handleColorSelect(color)}
-                            disabled={!isColorAvailable}
+                            className={`color-btn ${selectedColor === color ? "active" : ""} ${isSoldOut ? "sold-out" : ""} ${isUnavailable ? "unavailable" : ""}`}
+                            onClick={() => handleColorSelect(color)}
                             title={color}
                             style={{
                               backgroundColor: resolveColor(color),

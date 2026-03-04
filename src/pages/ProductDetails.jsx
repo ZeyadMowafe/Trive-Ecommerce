@@ -319,16 +319,19 @@ const ProductDetails = () => {
               <label>Size</label>
               <div className="size-options">
                 {product.sizes.map((size) => {
-                  const isSizeAvailable = availableSizes.includes(size);
+                  const isSizeInStockAtAll = availableSizes.includes(size);
+                  const isSizeAvailableForColor = availableSizesForColor.includes(size);
+                  const isSoldOut = !isSizeInStockAtAll;
+                  const isUnavailable = isSizeInStockAtAll && !isSizeAvailableForColor;
+
                   return (
                     <button
                       key={size}
-                      className={`size-btn ${selectedSize === size ? "active" : ""} ${!isSizeAvailable ? "sold-out" : ""}`}
-                      onClick={() => isSizeAvailable && handleSizeSelect(size)}
-                      disabled={!isSizeAvailable}
+                      className={`size-btn ${selectedSize === size ? "active" : ""} ${isSoldOut ? "sold-out" : ""} ${isUnavailable ? "unavailable" : ""}`}
+                      onClick={() => handleSizeSelect(size)}
                     >
                       {size}
-                      {!isSizeAvailable && (
+                      {isSoldOut && (
                         <span className="sold-out-label">Sold Out</span>
                       )}
                     </button>
@@ -342,15 +345,16 @@ const ProductDetails = () => {
               <label>Color: {selectedColor}</label>
               <div className="color-options">
                 {product.colors.map((color) => {
-                  const isColorAvailable = availableColors.includes(color);
+                  const isColorInStockAtAll = availableColors.includes(color);
+                  const isColorAvailableForSize = availableColorsForSize.includes(color);
+                  const isSoldOut = !isColorInStockAtAll;
+                  const isUnavailable = isColorInStockAtAll && !isColorAvailableForSize;
+
                   return (
                     <button
                       key={color}
-                      className={`color-btn ${selectedColor === color ? "active" : ""} ${!isColorAvailable ? "sold-out" : ""}`}
-                      onClick={() =>
-                        isColorAvailable && handleColorSelect(color)
-                      }
-                      disabled={!isColorAvailable}
+                      className={`color-btn ${selectedColor === color ? "active" : ""} ${isSoldOut ? "sold-out" : ""} ${isUnavailable ? "unavailable" : ""}`}
+                      onClick={() => handleColorSelect(color)}
                       title={color}
                       style={{
                         backgroundColor: product.colorMap?.[color] || color.toLowerCase(),

@@ -335,32 +335,48 @@
 
 /* Sold Out Styles for Size and Color */
 .size-btn.sold-out,
+.color-btn.sold-out,
+.size-btn.unavailable,
+.color-btn.unavailable {
+  opacity: 0.5;
+  cursor: pointer;
+  position: relative;
+}
+
+.size-btn.sold-out,
 .color-btn.sold-out {
   opacity: 0.3;
-  cursor: not-allowed;
-  position: relative;
+}
+
+.color-btn.sold-out::after,
+.color-btn.unavailable::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 110%;
+  background-color: #000;
+  transform: translate(-50%, -50%) rotate(45deg);
+  pointer-events: none;
+  box-shadow: 0 0 2px white;
 }
 
 .size-btn.sold-out::after {
   content: '';
   position: absolute;
   top: 50%;
-  left: 5%;
-  right: 5%;
-  height: 2px;
-  background-color: #dc3545;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background-color: #000;
   transform: translateY(-50%) rotate(-15deg);
+  pointer-events: none;
 }
 
-.color-btn.sold-out::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 2px;
-  height: 120%;
-  background-color: #dc3545;
-  transform: translate(-50%, -50%) rotate(45deg);
+.size-btn.unavailable:hover,
+.color-btn.unavailable:hover {
+  opacity: 0.8;
 }
 
 .size-btn.sold-out:hover,
