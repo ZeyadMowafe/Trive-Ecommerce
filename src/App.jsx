@@ -23,6 +23,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShippingPolicy from "./pages/ShippingPolicy.jsx";
 import ReturnPolicy from "./pages/ReturnPolicy.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -63,6 +64,7 @@ function App() {
                 <Route path="/addresses" element={<Addresses />} />
                 <Route path="/shipping-policy" element={<ShippingPolicy />} />
                 <Route path="/return-policy" element={<ReturnPolicy />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
             <Footer />
