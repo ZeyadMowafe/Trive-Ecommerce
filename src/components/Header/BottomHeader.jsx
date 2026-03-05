@@ -5,6 +5,7 @@ import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
 import { productsAPI } from "../../services/api";
 import CartDrawer from "../CartDrawer/CartDrawer";
+import logoImage from "../../assets/img/Logo.png";
 import "./Header.css";
 
 const BottomHeader = () => {
@@ -128,7 +129,7 @@ const BottomHeader = () => {
 
             {/* Logo */}
             <Link to="/" className="logo">
-              <img src="src\assets\img\Logo.png" alt="TRIVÉ" className="logo-image" />
+              <img src={logoImage} alt="TRIVÉ" className="logo-image" />
             </Link>
 
             {/* Desktop Navigation */}
