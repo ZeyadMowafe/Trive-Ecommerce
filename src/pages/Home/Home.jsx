@@ -215,7 +215,7 @@ const Home = () => {
               >
                 <Link to={`/shop/${category.slug}`} onClick={scrollToTop}>
                   <div className="category-image">
-                    <img src={category.image} alt={category.name} />
+                    <img src={category.image_url} alt={category.name} />
                     <div className="category-overlay"></div>
                   </div>
                   <div className="category-content">
