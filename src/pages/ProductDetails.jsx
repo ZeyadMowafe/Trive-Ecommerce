@@ -434,7 +434,7 @@ const ProductDetails = () => {
             <div className="product-meta">
               <div className="meta-item">
                 <span className="meta-label">Category:</span>
-                <Link to={`/ shop / ${product.category} `}>{product.category}</Link>
+                <Link to={`/shop/${product.categorySlug || product.category}`}>{product.category}</Link>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Availability:</span>
