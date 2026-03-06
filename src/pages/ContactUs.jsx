@@ -7,6 +7,7 @@ const ContactUs = () => {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -15,13 +16,16 @@ const ContactUs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError('');
+    setSubmitted(false);
     try {
       await contactAPI.submit(formData);
       setSubmitted(true);
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
       setTimeout(() => setSubmitted(false), 5000);
-    } catch (error) {
-      alert('Error sending message');
+    } catch (err) {
+      setError('Something went wrong. Please try again later.');
+      setTimeout(() => setError(''), 5000);
     } finally {
       setIsSubmitting(false);
     }
@@ -72,7 +76,13 @@ const ContactUs = () => {
 
             {submitted && (
               <motion.p className="success-message" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                Message sent successfully! We'll get back to you soon.
+                ✅ Message sent successfully! We'll get back to you soon.
+              </motion.p>
+            )}
+
+            {error && (
+              <motion.p className="error-message" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                ❌ {error}
               </motion.p>
             )}
           </motion.form>
