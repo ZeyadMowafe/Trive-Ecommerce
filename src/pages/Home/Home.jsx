@@ -69,14 +69,14 @@ const Home = () => {
   const heroSlides = [
     {
       image:
-        "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600",
+        "https://res.cloudinary.com/dhwvrtali/image/upload/v1772772571/herosection_miow6m.png",
       title: "Winter Collection",
       subtitle: "Discover Timeless Elegance",
       link: "/shop/women",
     },
     {
       image:
-        "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1600",
+        "https://res.cloudinary.com/dhwvrtali/image/upload/v1772772592/herosection2_usbwgi.png",
       title: "New Arrivals",
       subtitle: "Fresh Styles for the Season",
       link: "/shop/new",
