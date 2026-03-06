@@ -74,6 +74,21 @@
   font-weight: 500;
   margin-top: 1rem;
   text-align: center;
+  padding: 0.75rem 1rem;
+  background: #f0fff4;
+  border-radius: 8px;
+  border: 1px solid #b7ebc8;
+}
+
+.error-message {
+  color: #dc3545;
+  font-weight: 500;
+  margin-top: 1rem;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  background: #fff5f5;
+  border-radius: 8px;
+  border: 1px solid #fcc;
 }
 
 .contact-info {
