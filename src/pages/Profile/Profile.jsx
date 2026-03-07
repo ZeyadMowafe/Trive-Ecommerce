@@ -1,18 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import { useCart } from '../../context/CartContext';
+
 import { useNavigate, Link } from 'react-router-dom';
 import './Profile.css';
 
 const Profile = () => {
     const { user, logout, loading } = useAuth();
-    const { clearCart } = useCart();
+
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         await logout();
-        clearCart(); // Optional: clear local cart state on logout
         navigate('/login');
     };
 
