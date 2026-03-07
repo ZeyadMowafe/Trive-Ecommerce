@@ -251,17 +251,140 @@
 }
 
 @media (max-width: 768px) {
+
+    /* Page */
+    .addresses-page {
+        padding: 80px 0 40px;
+    }
+
+    /* Header */
     .addresses-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 20px;
+        gap: 16px;
+        margin-bottom: 24px;
     }
 
+    .addresses-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .addresses-header .btn-primary {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Grid → single column */
     .addresses-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
 
+    /* Cards tighter */
+    .address-card {
+        padding: 20px;
+    }
+
+    .address-card:hover {
+        transform: none;
+        /* Disable hover lift on touch */
+    }
+
+    .address-details h3 {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        padding-right: 60px;
+        /* Space for default badge */
+    }
+
+    /* Actions wrap on small screens */
+    .address-actions {
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+        padding-top: 14px;
+    }
+
+    .action-btn {
+        font-size: 0.82rem;
+    }
+
+    /* Modal full-screen on mobile */
+    .modal-overlay {
+        align-items: flex-end;
+        /* Slide up from bottom */
+        padding: 0;
+    }
+
+    .modal-content {
+        border-radius: 20px 20px 0 0;
+        padding: 24px 20px;
+        max-height: 92vh;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .modal-header {
+        margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 1.35rem;
+    }
+
+    /* Form inputs - prevent iOS zoom */
+    .form-group input {
+        font-size: 16px;
+        padding: 11px 14px;
+    }
+
+    /* Stack .form-row to single column */
     .form-row {
         grid-template-columns: 1fr;
+        gap: 0;
+        /* gap handled by address-form gap */
+    }
+
+    /* Form actions stack on very small */
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .form-actions button {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Empty state */
+    .empty-addresses {
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .addresses-page {
+        padding: 70px 0 30px;
+    }
+
+    .address-card {
+        padding: 16px;
+        border-radius: 10px;
+    }
+
+    .modal-content {
+        padding: 20px 16px;
+        max-height: 95vh;
+    }
+
+    .default-badge {
+        font-size: 0.65rem;
+        padding: 3px 8px;
+        top: 14px;
+        right: 14px;
     }
 }
