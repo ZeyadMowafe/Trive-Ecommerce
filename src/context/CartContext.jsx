@@ -248,7 +248,7 @@ export function CartProvider({ children }) {
     [isAuthenticated],
   );
 
-  const clearCart = useCallback(async () => {
+  const clearCart = useCallback(async (silent = false) => {
     if (isAuthenticated) {
       try {
         await cartAPI.clearCart();
@@ -256,7 +256,7 @@ export function CartProvider({ children }) {
     }
     setItems([]);
     if (!isAuthenticated) localStorage.removeItem(CART_STORAGE_KEY);
-    toast.info("تم تفريغ السلة");
+    if (!silent) toast.info("تم تفريغ السلة");
   }, [isAuthenticated]);
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
