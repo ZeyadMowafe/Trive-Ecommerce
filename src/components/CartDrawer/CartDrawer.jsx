@@ -129,6 +129,10 @@ const CartDrawer = () => {
                               </p>
                             )}
 
+                            <div className="cart-item-price">
+                              {(item.price * item.quantity).toFixed(2)} EGP
+                            </div>
+
                             <div className="cart-item-actions">
                               <div className="quantity-control">
                                 <button
@@ -201,10 +205,6 @@ const CartDrawer = () => {
                                 </svg>
                               </button>
                             </div>
-                          </div>
-
-                          <div className="cart-item-price">
-                            {(item.price * item.quantity).toFixed(2)} EGP
                           </div>
                         </motion.div>
                       );
