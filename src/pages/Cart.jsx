@@ -45,7 +45,7 @@ const Cart = () => {
                   className="cart-item-row"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
+                  exit={{ opacity: 0, height: 0 }}
                 >
                   <div className="cart-item-image">
                     <Link to={`/product/${item.slug}`}>
@@ -67,6 +67,10 @@ const Cart = () => {
                         Max stock reached ({item.stockAvailable})
                       </p>
                     )}
+
+                    <div className="cart-item-price">
+                      {(item.price * item.quantity).toFixed(2)} EGP
+                    </div>
 
                     <div className="cart-item-actions">
                       <div className="quantity-control">
@@ -103,10 +107,6 @@ const Cart = () => {
                       </button>
                     </div>
                   </div>
-
-                  <div className="cart-item-price">
-                    {(item.price * item.quantity).toFixed(2)} EGP
-                  </div>
                 </motion.div>
               );
             })}
@@ -115,6 +115,7 @@ const Cart = () => {
           <div className="cart-summary">
             <h3>Order Summary</h3>
             <div className="summary-row">
+              <span>Subtotal</span>
               <span>{getCartTotal().toFixed(2)} EGP</span>
             </div>
             <div className="summary-row">
