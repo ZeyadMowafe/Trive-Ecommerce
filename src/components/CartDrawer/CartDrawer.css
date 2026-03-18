@@ -179,6 +179,7 @@
 .cart-item-price {
   font-weight: 600;
   color: var(--primary-dark);
+  margin-right: 1.5rem;
 }
 
 .cart-footer {
