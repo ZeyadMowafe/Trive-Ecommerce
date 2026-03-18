@@ -85,7 +85,8 @@
   display: grid;
   grid-template-columns: 100px 1fr auto;
   gap: 1rem;
-  padding-bottom: 1.5rem;
+  padding: 0 1rem 1.5rem 0;
+  /* Add right padding to the row itself */
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -181,7 +182,8 @@
 .cart-item-price {
   font-weight: 600;
   color: var(--primary-dark);
-  margin-right: 4rem;
+  text-align: right;
+  padding-right: 1rem;
 }
 
 .cart-footer {
@@ -235,7 +237,7 @@
   }
 
   .cart-item-price {
-    margin-right: 2rem;
+    margin-right: 0.5rem;
   }
 
   .cart-item-image {
