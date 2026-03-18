@@ -100,7 +100,7 @@ const CartDrawer = () => {
                           className="cart-item"
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, x: 100 }}
+                          exit={{ opacity: 0, height: 0 }}
                         >
                           <Link
                             to={`/product/${item.slug}`}
